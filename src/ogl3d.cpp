@@ -7,9 +7,17 @@
 //============================================================================
 
 #include <iostream>
-using namespace std;
+#include "Common.hpp"
+#include "util/Configuration.hpp"
+#include "util/Logger.hpp"
+
 
 int main() {
-	cout << "hello world!" << endl; // prints
+
+	auto config = util::Configuration::getInstance("res/ogl3d.config");
+	auto logger = util::Logger::getInstance(std::cout);
+
+	logger->info("fs: %d\n", config->get("FULLSCREEN"));
+
 	return 0;
 }
