@@ -1,12 +1,12 @@
 /*
- * Configuration.hpp
+ * Config.hpp
  *
  *  Created on: Jul 26, 2014
  *      Author: michal
  */
 
-#ifndef CONFIGURATION_HPP_
-#define CONFIGURATION_HPP_
+#ifndef CONFIG_HPP_
+#define CONFIG_HPP_
 
 #include <fstream>
 #include "../Common.hpp"
@@ -14,14 +14,14 @@
 
 namespace util {
 
-class Configuration: public Singleton<Configuration> {
+class Config : public Singleton<Config> {
 	friend class Singleton;
 
 private:
 
 	map<string, int> options;
 
-	Configuration(string configFilePath) {
+	Config(const string& configFilePath) {
 		std::ifstream input(configFilePath.c_str());
 		for (string line; std::getline(input, line);) {
 			size_t delim = line.find('=');
@@ -39,4 +39,4 @@ public:
 
 }
 
-#endif /* CONFIGURATION_HPP_ */
+#endif /* CONFIG_HPP_ */
