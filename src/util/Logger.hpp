@@ -29,6 +29,8 @@ private:
 	std::ostream& out;
 	char buffer[512];
 
+	Logger() : Logger(std::cout, LoggerLevel::INFO) { }
+
 	Logger(std::ostream& loggerOutput, const LoggerLevel& loggerLevel)
 		: level(loggerLevel), out(loggerOutput) { }
 

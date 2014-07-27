@@ -21,6 +21,8 @@ private:
 
 	map<string, int> options;
 
+	Config() { }
+
 	Config(const string& configFilePath) {
 		std::ifstream input(configFilePath.c_str());
 		for (string line; std::getline(input, line);) {
