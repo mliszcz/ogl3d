@@ -38,6 +38,9 @@ public:
 			glDetachShader(handle, shader->getHandle());
 	}
 
+	Program(const initializer_list<shared_ptr<Shader>>& shaders)
+		: Program(vector<shared_ptr<Shader>>(shaders)) { }
+
 	~Program() {
 		glDeleteProgram(handle);
 	}

@@ -23,6 +23,9 @@
 #include "shader/FragmentShader.hpp"
 #include "shader/Program.hpp"
 
+#include "gfx/GenericBuffer.hpp"
+
+
 class Application : public util::Singleton<Application> {
 	friend class Singleton;
 
@@ -31,15 +34,9 @@ private:
 	shared_ptr<util::Config> config = util::Config::getInstance();
 	shared_ptr<util::Logger> logger = util::Logger::getInstance();
 
-	shared_ptr<shader::Program> theProgram = nullptr;
+	shared_ptr<shader::Program> program = nullptr;
+	shared_ptr<gfx::GenericBuffer> buffer = nullptr;
 
-	const float vertexPositions[12] = {
-				0.75f, 0.75f, 0.0f,
-				1.0f, 0.75f, -0.75f,
-				0.0f, 1.0f, -0.75f,
-				-0.75f, 0.0f, 1.0f, };
-
-	GLuint positionBufferObject = 0;
 	GLuint vao = 0;
 
 
@@ -49,9 +46,6 @@ public:
 	void onDisplay();
 	void onReshape(int width, int height);
 	void onKeyboard(unsigned char key, int x, int y);
-
-	void InitializeVertexBuffer();
-	shared_ptr<shader::Program> InitializeProgram();
 
 	void run() {
 		glutMainLoop();
