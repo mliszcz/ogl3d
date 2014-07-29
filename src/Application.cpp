@@ -47,12 +47,10 @@ void Application::onKeyboard(unsigned char key, int x, int y) {
 
 shared_ptr<shader::Program> Application::InitializeProgram() {
 
-	auto vs = shader::VertexShader::fromFile("res/shaders/simple.vert");
-	auto fs = shader::FragmentShader::fromFile("res/shaders/simple.frag");
-
-	vector<shared_ptr<shader::Shader>> shaderList;
-	shaderList.push_back(vs);
-	shaderList.push_back(fs);
+	vector<shared_ptr<shader::Shader>> shaderList = {
+		shader::VertexShader::fromFile("res/shaders/simple.vert"),
+		shader::FragmentShader::fromFile("res/shaders/simple.frag")
+	};
 
 	return make_shared<shader::Program>(shaderList);
 }

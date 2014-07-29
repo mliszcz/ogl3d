@@ -16,17 +16,9 @@
 
 namespace shader {
 
-class Program {
-
-private:
-
-	GLuint handle;
+class Program : public GLObject {
 
 public:
-
-	GLuint getHandle() {
-		return handle;
-	}
 
 	Program(const vector<shared_ptr<Shader>>& shaders) {
 

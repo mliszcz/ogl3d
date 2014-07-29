@@ -18,15 +18,7 @@
 
 namespace shader {
 
-class Shader {
-
-protected:
-	GLuint handle;
-
-public:
-	GLuint getHandle() {
-		return handle;
-	}
+class Shader : public GLObject {
 
 protected:
 

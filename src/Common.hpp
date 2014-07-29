@@ -14,6 +14,8 @@
 #include <list>
 #include <map>
 
+#include "GLObject.hpp"
+
 using std::string;
 using std::vector;
 using std::shared_ptr;
