@@ -1,18 +1,15 @@
 /*
  * Application.hpp
  *
- *  Created on: Jul 27, 2014
+ *  Created on: Jul 30, 2014
  *      Author: michal
  */
 
 #ifndef APPLICATION_HPP_
 #define APPLICATION_HPP_
 
-#include <functional>
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-
 #include "Common.hpp"
+#include "ApplicationBase.hpp"
 
 #include "util/Singleton.hpp"
 #include "util/Config.hpp"
@@ -25,82 +22,77 @@
 
 #include "gfx/GenericBuffer.hpp"
 
-
-class Application : public util::Singleton<Application> {
-	friend class Singleton;
+class Application : public ApplicationBase, public util::Singleton<Application> {
+	friend class util::Singleton<Application>;
 
 private:
-
-	shared_ptr<util::Config> config = util::Config::getInstance();
-	shared_ptr<util::Logger> logger = util::Logger::getInstance();
-
 	shared_ptr<shader::Program> program = nullptr;
 	shared_ptr<gfx::GenericBuffer> buffer = nullptr;
 
 	GLuint vao = 0;
 
+private:
+
+	Application(int argc, char** argv)
+		: ApplicationBase(argc, argv) { }
 
 public:
 
-	void onInit();
-	void onDisplay();
-	void onReshape(int width, int height);
-	void onKeyboard(unsigned char key, int x, int y);
-
-	void run() {
-		glutMainLoop();
-	}
-
 	virtual ~Application() { }
 
-private:
+	virtual void onInit() {
 
-	Application(int argc, char** argv) {
+		program = make_shared<shader::Program>(initializer_list<shared_ptr<shader::Shader>> {
+				shader::VertexShader::fromFile("res/shaders/simple.vert"),
+				shader::FragmentShader::fromFile("res/shaders/simple.frag")
+		});
 
-		using namespace std::placeholders;
+		buffer = make_shared<gfx::GenericBuffer>();
+		buffer->realloc({
+			     0.0f,    0.5f, 0.0f, 1.0f,
+			     0.5f, -0.366f, 0.0f, 1.0f,
+			    -0.5f, -0.366f, 0.0f, 1.0f,
+			     1.0f,    0.0f, 0.0f, 1.0f,
+			     0.0f,    1.0f, 0.0f, 1.0f,
+			     0.0f,    0.0f, 1.0f, 1.0f,
+		});
 
-		glutInit(&argc, argv);
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+	}
 
-		int width = config->get("WINDOW_WIDTH");
-		int height = config->get("WINDOW_HEIGHT");
+	virtual void onReshape(int width, int height) {
+		glViewport(0, 0, (GLsizei) width, (GLsizei) height);
+	}
 
-		unsigned int displayMode = GLUT_DOUBLE | GLUT_ALPHA | GLUT_DEPTH | GLUT_STENCIL;
-
-		glutInitDisplayMode(displayMode);
-		glutInitContextVersion(3, 3);
-		glutInitContextProfile(GLUT_CORE_PROFILE);
-		glutInitContextFlags(GLUT_DEBUG);
-
-		glutInitWindowSize(width, height);
-		glutCreateWindow(argv[0]);
-
-		glewExperimental = GL_TRUE; // required on i5-4200u/HD4400 & Mesa 10.1.3
-		GLenum res = glewInit();
-		if (res != GLEW_OK) {
-			fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
+	void onKeyboard(unsigned char key, int x, int y) {
+		switch (key) {
+		case 27:
+			glutLeaveMainLoop();
+			return;
 		}
+	}
 
-//		glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
+	virtual void onDisplay() {
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
 
-		/*
-		 * static wrappers are needed, cause opengl is crappy
-		 *
-		 * lambda with captured state cannot be used as plain old c-style function
-		 *
-		 * there can be only one instance of Application
-		 * but this is not a problem, cause Application is singleton
-		 */
-		static std::function<void()>						fun_display;
-		static std::function<void(int, int)>				fun_reshape;
-		static std::function<void(unsigned char, int, int)>	fun_keyboard;
+		glUseProgram(program->getHandle());
 
-		fun_display = [this]() { this->onDisplay(); };
-		fun_reshape = [this](int w, int h) { this->onReshape(w, h); };
-		fun_keyboard = [this](unsigned char key, int x, int y) { this->onKeyboard(key, x, y); };
+		glBindBuffer(GL_ARRAY_BUFFER, buffer->getHandle());
+		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*) 48);
 
-		glutDisplayFunc([](){ fun_display(); });
-		glutReshapeFunc([](int w, int h){ fun_reshape(w, h); });
-		glutKeyboardFunc([](unsigned char key, int x, int y){ fun_keyboard(key, x, y); });
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glUseProgram(0);
+
+		glutSwapBuffers();
+		glutPostRedisplay();
 	}
 
 };
