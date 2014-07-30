@@ -25,7 +25,7 @@ public:
 		handle = glCreateProgram();
 
 		for(auto& shader : shaders)
-			glAttachShader(handle, shader->getHandle());
+			glAttachShader(handle, *shader);
 
 		glLinkProgram(handle);
 
@@ -35,7 +35,7 @@ public:
 		}
 
 		for(auto& shader : shaders)
-			glDetachShader(handle, shader->getHandle());
+			glDetachShader(handle, *shader);
 	}
 
 	Program(const initializer_list<shared_ptr<Shader>>& shaders)

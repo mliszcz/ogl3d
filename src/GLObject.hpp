@@ -20,6 +20,10 @@ public:
 	GLuint getHandle() {
 		return handle;
 	}
+
+	operator GLuint() {
+		return handle;
+	}
 };
 
 #endif /* GLOBJECT_HPP_ */

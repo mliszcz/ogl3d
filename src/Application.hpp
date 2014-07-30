@@ -31,6 +31,8 @@ private:
 
 	GLuint vao = 0;
 
+	int offsetLocation = 0;
+
 private:
 
 	Application(int argc, char** argv)
@@ -59,6 +61,8 @@ public:
 
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
+
+		offsetLocation = glGetUniformLocation(*program, "offset");
 	}
 
 	virtual void onReshape(int width, int height) {
@@ -77,9 +81,14 @@ public:
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(program->getHandle());
+		float fXOffset = 0.0f, fYOffset = 0.0f;
+//		ComputePositionOffsets(fXOffset, fYOffset);
 
-		glBindBuffer(GL_ARRAY_BUFFER, buffer->getHandle());
+		glUseProgram(*program);
+
+		glUniform2f(offsetLocation, fXOffset, fYOffset);
+
+		glBindBuffer(GL_ARRAY_BUFFER, *buffer);
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
