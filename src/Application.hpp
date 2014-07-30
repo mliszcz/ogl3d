@@ -40,14 +40,29 @@ private:
 
 public:
 
+	void ComputePositionOffsets(float &fXOffset, float &fYOffset)
+	{
+	    const float fLoopDuration = 5.0f;
+	    const float fScale = 3.14159f * 2.0f / fLoopDuration;
+
+	    float fElapsedTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+
+	    float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
+
+	    fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 0.5f;
+	    fYOffset = sinf(fCurrTimeThroughLoop * fScale) * 0.5f;
+	}
+
 	virtual ~Application() { }
 
 	virtual void onInit() {
 
-		program = make_shared<shader::Program>(initializer_list<shared_ptr<shader::Shader>> {
+		auto shaders = {
 				shader::VertexShader::fromFile("res/shaders/simple.vert"),
 				shader::FragmentShader::fromFile("res/shaders/simple.frag")
-		});
+		};
+
+		program = make_shared<shader::Program>(shaders);
 
 		buffer = make_shared<gfx::GenericBuffer>();
 		buffer->realloc({
@@ -82,7 +97,7 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		float fXOffset = 0.0f, fYOffset = 0.0f;
-//		ComputePositionOffsets(fXOffset, fYOffset);
+		ComputePositionOffsets(fXOffset, fYOffset);
 
 		glUseProgram(*program);
 
