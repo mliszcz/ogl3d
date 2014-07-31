@@ -18,8 +18,6 @@
 #include <list>
 #include <map>
 
-#include "GLObject.hpp"
-
 using std::string;
 using std::vector;
 using std::shared_ptr;
@@ -30,5 +28,10 @@ using std::initializer_list;
 
 using std::logic_error;
 using std::length_error;
+
+#include "GLObject.hpp"
+//#include "gfx/type/Matrix.hpp"
+//#include "gfx/type/Vector.hpp"
+//#include "gfx/type/Scalar.hpp"
 
 #endif /* COMMON_HPP_ */

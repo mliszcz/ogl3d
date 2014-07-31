@@ -13,6 +13,7 @@
 
 #include "Shader.hpp"
 #include "../Common.hpp"
+#include "UniformVariable.hpp"
 
 namespace shader {
 
@@ -20,33 +21,34 @@ class Program : public GLObject {
 
 public:
 
-	GLint getUniformHandle(string name) {
-		return glGetUniformLocation(handle, name.c_str());
+	UniformVariable<Program> uniform(string name) {
+		return UniformVariable<Program>(this, name);
 	}
 
 	Program(const vector<shared_ptr<Shader>>& shaders) {
 
-		handle = glCreateProgram();
+		_handle = glCreateProgram();
 
 		for(auto& shader : shaders)
-			glAttachShader(handle, *shader);
+			glAttachShader(_handle, *shader);
 
-		glLinkProgram(handle);
+		glLinkProgram(_handle);
 
-		if (getProgramiv(handle, GL_LINK_STATUS) == GL_FALSE) {
-			util::Logger::getInstance()->
-					error("failed to link the program:\n%s\n", getProgramInfoLog(handle).c_str());
+		if (getProgramiv(_handle, GL_LINK_STATUS) == GL_FALSE) {
+//			util::Logger::getInstance()->
+//					error("failed to link the program:\n%s\n", getProgramInfoLog(_handle).c_str());
+			throw logic_error("failed to link the program:\n" + getProgramInfoLog(_handle));
 		}
 
 		for(auto& shader : shaders)
-			glDetachShader(handle, *shader);
+			glDetachShader(_handle, *shader);
 	}
 
 	Program(const initializer_list<shared_ptr<Shader>>& shaders)
 		: Program(vector<shared_ptr<Shader>>(shaders)) { }
 
 	~Program() {
-		glDeleteProgram(handle);
+		glDeleteProgram(_handle);
 	}
 
 private:

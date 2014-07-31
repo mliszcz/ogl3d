@@ -37,7 +37,7 @@ public:
 		return _data.at(row*cols+col);
 	}
 
-	T* data() {
+	const T* data() const {
 		return _data.data();
 	}
 };

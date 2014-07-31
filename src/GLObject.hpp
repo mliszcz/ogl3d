@@ -14,15 +14,15 @@
 class GLObject {
 
 protected:
-	GLuint handle;
+	GLuint _handle;
 
 public:
-	GLuint getHandle() {
-		return handle;
+	GLuint handle() {
+		return _handle;
 	}
 
 	operator GLuint() {
-		return handle;
+		return _handle;
 	}
 };
 

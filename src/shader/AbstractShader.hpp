@@ -36,21 +36,21 @@ public:
 	}
 
 	virtual ~AbstractShader() {
-		glDeleteShader(handle);
+		glDeleteShader(_handle);
 	}
 
 private:
 
 	AbstractShader(string source) {
 
-		handle = glCreateShader(shaderType);
+		_handle = glCreateShader(shaderType);
 		const char* szSource = source.c_str();
-		glShaderSource(handle, 1, &szSource, nullptr);
-		glCompileShader(handle);
+		glShaderSource(_handle, 1, &szSource, nullptr);
+		glCompileShader(_handle);
 
-		if (getShaderiv(handle, GL_COMPILE_STATUS) == GL_FALSE) {
+		if (getShaderiv(_handle, GL_COMPILE_STATUS) == GL_FALSE) {
 			util::Logger::getInstance()->
-					error("failed to compile the shader:\n%s\n", getShaderInfoLog(handle).c_str());
+					error("failed to compile the shader:\n%s\n", getShaderInfoLog(_handle).c_str());
 		}
 	}
 };

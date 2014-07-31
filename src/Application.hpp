@@ -21,6 +21,7 @@
 #include "shader/Program.hpp"
 
 #include "gfx/GenericBuffer.hpp"
+
 #include "gfx/type/Matrix.hpp"
 #include "gfx/type/Vector.hpp"
 #include "gfx/type/Scalar.hpp"
@@ -67,7 +68,7 @@ public:
 		perspectiveMatrix.at(3,2) = -1.0f;
 
 		glUseProgram(*program);
-		glUniformMatrix4fv(program->getUniformHandle("perspectiveMatrix"), 1, GL_TRUE, perspectiveMatrix.data());
+		program->uniform("perspectiveMatrix") = perspectiveMatrix;
 		glUseProgram(0);
 
 		buffer = make_shared<gfx::GenericBuffer>();
@@ -184,7 +185,8 @@ public:
 		perspectiveMatrix.at(1,1) = fFrustumScale;
 
 		glUseProgram(*program);
-		glUniformMatrix4fv(program->getUniformHandle("perspectiveMatrix"), 1, GL_TRUE, perspectiveMatrix.data());
+//		glUniformMatrix4fv(program->getUniformHandle("perspectiveMatrix"), 1, GL_TRUE, perspectiveMatrix.data());
+		program->uniform("perspectiveMatrix") = perspectiveMatrix;
 		glUseProgram(0);
 
 		glViewport(0, 0, (GLsizei) width, (GLsizei) height);
@@ -204,12 +206,9 @@ public:
 
 		glUseProgram(*program);
 
-		float num = 5.0f;
+		program->uniform("loopDuration") = 5.0f;
 
-		glUniform1fv(program->getUniformHandle("loopDuration"), 1, &num);
-
-//		glUniform1f(program->getUniformHandle("loopDuration"), 5.0f);
-		glUniform1f(program->getUniformHandle("time"), glutGet(GLUT_ELAPSED_TIME) / 1000.0f);
+		program->uniform("time") = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 
 		glBindBuffer(GL_ARRAY_BUFFER, *buffer);
 		glEnableVertexAttribArray(0);

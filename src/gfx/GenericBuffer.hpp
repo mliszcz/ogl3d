@@ -24,11 +24,11 @@ private:
 public:
 
 	GenericBuffer() {
-		glGenBuffers(1, &handle);
+		glGenBuffers(1, &_handle);
 	}
 
 	~GenericBuffer() {
-		glDeleteBuffers(1, &handle);
+		glDeleteBuffers(1, &_handle);
 	}
 
 	unsigned int size() {
@@ -42,7 +42,7 @@ public:
 
 	template <typename T>
 	void realloc(const vector<T>& data) {
-		glBindBuffer(GL_ARRAY_BUFFER, handle);
+		glBindBuffer(GL_ARRAY_BUFFER, _handle);
 		glBufferData(GL_ARRAY_BUFFER, data.size()*sizeof(T), data.data(), GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		_size = data.size();
