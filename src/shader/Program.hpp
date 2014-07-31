@@ -20,6 +20,10 @@ class Program : public GLObject {
 
 public:
 
+	GLint getUniformHandle(string name) {
+		return glGetUniformLocation(handle, name.c_str());
+	}
+
 	Program(const vector<shared_ptr<Shader>>& shaders) {
 
 		handle = glCreateProgram();

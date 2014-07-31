@@ -17,6 +17,10 @@ namespace gfx {
 
 class GenericBuffer : public GLObject {
 
+private:
+
+	unsigned int _size = 0;
+
 public:
 
 	GenericBuffer() {
@@ -25,6 +29,10 @@ public:
 
 	~GenericBuffer() {
 		glDeleteBuffers(1, &handle);
+	}
+
+	unsigned int size() {
+		return _size;
 	}
 
 	template <typename T>
@@ -37,6 +45,7 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, handle);
 		glBufferData(GL_ARRAY_BUFFER, data.size()*sizeof(T), data.data(), GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		_size = data.size();
 	}
 };
 

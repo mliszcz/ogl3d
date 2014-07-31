@@ -31,7 +31,8 @@ private:
 
 	GLuint vao = 0;
 
-	int offsetLocation = 0;
+	vector<float> perspectiveMatrix = vector<float>(16, 0);
+	float fFrustumScale = 1.0f;
 
 private:
 
@@ -39,19 +40,6 @@ private:
 		: ApplicationBase(argc, argv) { }
 
 public:
-
-	void ComputePositionOffsets(float &fXOffset, float &fYOffset)
-	{
-	    const float fLoopDuration = 5.0f;
-	    const float fScale = 3.14159f * 2.0f / fLoopDuration;
-
-	    float fElapsedTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-
-	    float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
-
-	    fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 0.5f;
-	    fYOffset = sinf(fCurrTimeThroughLoop * fScale) * 0.5f;
-	}
 
 	virtual ~Application() { }
 
@@ -64,23 +52,135 @@ public:
 
 		program = make_shared<shader::Program>(shaders);
 
+		float fzNear = 0.5f; float fzFar = 3.0f;
+
+			perspectiveMatrix[0] = fFrustumScale;
+			perspectiveMatrix[5] = fFrustumScale;
+			perspectiveMatrix[10] = (fzFar + fzNear) / (fzNear - fzFar);
+			perspectiveMatrix[14] = (2 * fzFar * fzNear) / (fzNear - fzFar);
+			perspectiveMatrix[11] = -1.0f;
+
+		glUseProgram(*program);
+		glUniformMatrix4fv(program->getUniformHandle("perspectiveMatrix"), 1, GL_FALSE, perspectiveMatrix.data());
+		glUseProgram(0);
+
 		buffer = make_shared<gfx::GenericBuffer>();
 		buffer->realloc({
-			     0.0f,    0.5f, 0.0f, 1.0f,
-			     0.5f, -0.366f, 0.0f, 1.0f,
-			    -0.5f, -0.366f, 0.0f, 1.0f,
-			     1.0f,    0.0f, 0.0f, 1.0f,
-			     0.0f,    1.0f, 0.0f, 1.0f,
-			     0.0f,    0.0f, 1.0f, 1.0f,
+			 0.25f,  0.25f, -1.25f, 1.0f,
+			 0.25f, -0.25f, -1.25f, 1.0f,
+			-0.25f,  0.25f, -1.25f, 1.0f,
+
+			 0.25f, -0.25f, -1.25f, 1.0f,
+			-0.25f, -0.25f, -1.25f, 1.0f,
+			-0.25f,  0.25f, -1.25f, 1.0f,
+
+			 0.25f,  0.25f, -2.75f, 1.0f,
+			-0.25f,  0.25f, -2.75f, 1.0f,
+			 0.25f, -0.25f, -2.75f, 1.0f,
+
+			 0.25f, -0.25f, -2.75f, 1.0f,
+			-0.25f,  0.25f, -2.75f, 1.0f,
+			-0.25f, -0.25f, -2.75f, 1.0f,
+
+			-0.25f,  0.25f, -1.25f, 1.0f,
+			-0.25f, -0.25f, -1.25f, 1.0f,
+			-0.25f, -0.25f, -2.75f, 1.0f,
+
+			-0.25f,  0.25f, -1.25f, 1.0f,
+			-0.25f, -0.25f, -2.75f, 1.0f,
+			-0.25f,  0.25f, -2.75f, 1.0f,
+
+			 0.25f,  0.25f, -1.25f, 1.0f,
+			 0.25f, -0.25f, -2.75f, 1.0f,
+			 0.25f, -0.25f, -1.25f, 1.0f,
+
+			 0.25f,  0.25f, -1.25f, 1.0f,
+			 0.25f,  0.25f, -2.75f, 1.0f,
+			 0.25f, -0.25f, -2.75f, 1.0f,
+
+			 0.25f,  0.25f, -2.75f, 1.0f,
+			 0.25f,  0.25f, -1.25f, 1.0f,
+			-0.25f,  0.25f, -1.25f, 1.0f,
+
+			 0.25f,  0.25f, -2.75f, 1.0f,
+			-0.25f,  0.25f, -1.25f, 1.0f,
+			-0.25f,  0.25f, -2.75f, 1.0f,
+
+			 0.25f, -0.25f, -2.75f, 1.0f,
+			-0.25f, -0.25f, -1.25f, 1.0f,
+			 0.25f, -0.25f, -1.25f, 1.0f,
+
+			 0.25f, -0.25f, -2.75f, 1.0f,
+			-0.25f, -0.25f, -2.75f, 1.0f,
+			-0.25f, -0.25f, -1.25f, 1.0f,
+
+			0.0f, 0.0f, 1.0f, 1.0f,
+			0.0f, 0.0f, 1.0f, 1.0f,
+			0.0f, 0.0f, 1.0f, 1.0f,
+
+			0.0f, 0.0f, 1.0f, 1.0f,
+			0.0f, 0.0f, 1.0f, 1.0f,
+			0.0f, 0.0f, 1.0f, 1.0f,
+
+			0.8f, 0.8f, 0.8f, 1.0f,
+			0.8f, 0.8f, 0.8f, 1.0f,
+			0.8f, 0.8f, 0.8f, 1.0f,
+
+			0.8f, 0.8f, 0.8f, 1.0f,
+			0.8f, 0.8f, 0.8f, 1.0f,
+			0.8f, 0.8f, 0.8f, 1.0f,
+
+			0.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 1.0f,
+
+			0.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 1.0f,
+
+			0.5f, 0.5f, 0.0f, 1.0f,
+			0.5f, 0.5f, 0.0f, 1.0f,
+			0.5f, 0.5f, 0.0f, 1.0f,
+
+			0.5f, 0.5f, 0.0f, 1.0f,
+			0.5f, 0.5f, 0.0f, 1.0f,
+			0.5f, 0.5f, 0.0f, 1.0f,
+
+			1.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 0.0f, 0.0f, 1.0f,
+
+			1.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 0.0f, 0.0f, 1.0f,
+
+			0.0f, 1.0f, 1.0f, 1.0f,
+			0.0f, 1.0f, 1.0f, 1.0f,
+			0.0f, 1.0f, 1.0f, 1.0f,
+
+			0.0f, 1.0f, 1.0f, 1.0f,
+			0.0f, 1.0f, 1.0f, 1.0f,
+			0.0f, 1.0f, 1.0f, 1.0f,
+
 		});
 
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 
-		offsetLocation = glGetUniformLocation(*program, "offset");
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glFrontFace(GL_CW);
 	}
 
 	virtual void onReshape(int width, int height) {
+
+		perspectiveMatrix[0] = fFrustumScale / (width / (float)height);
+		perspectiveMatrix[5] = fFrustumScale;
+
+		glUseProgram(*program);
+		glUniformMatrix4fv(program->getUniformHandle("perspectiveMatrix"), 1, GL_FALSE, perspectiveMatrix.data());
+		glUseProgram(0);
+
 		glViewport(0, 0, (GLsizei) width, (GLsizei) height);
 	}
 
@@ -96,20 +196,18 @@ public:
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		float fXOffset = 0.0f, fYOffset = 0.0f;
-		ComputePositionOffsets(fXOffset, fYOffset);
-
 		glUseProgram(*program);
 
-		glUniform2f(offsetLocation, fXOffset, fYOffset);
+		glUniform1f(program->getUniformHandle("loopDuration"), 5.0f);
+		glUniform1f(program->getUniformHandle("time"), glutGet(GLUT_ELAPSED_TIME) / 1000.0f);
 
 		glBindBuffer(GL_ARRAY_BUFFER, *buffer);
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*) 48);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*buffer->size()/2));
 
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, buffer->size()/2/4);
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
