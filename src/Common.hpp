@@ -9,6 +9,7 @@
 #define COMMON_HPP_
 
 #include <initializer_list>
+#include <stdexcept>
 #include <algorithm>
 #include <iterator>
 #include <string>
@@ -26,5 +27,8 @@ using std::make_shared;
 using std::list;
 using std::map;
 using std::initializer_list;
+
+using std::logic_error;
+using std::length_error;
 
 #endif /* COMMON_HPP_ */

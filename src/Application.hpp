@@ -21,6 +21,9 @@
 #include "shader/Program.hpp"
 
 #include "gfx/GenericBuffer.hpp"
+#include "gfx/type/Matrix.hpp"
+#include "gfx/type/Vector.hpp"
+#include "gfx/type/Scalar.hpp"
 
 class Application : public ApplicationBase, public util::Singleton<Application> {
 	friend class util::Singleton<Application>;
@@ -31,8 +34,11 @@ private:
 
 	GLuint vao = 0;
 
-	vector<float> perspectiveMatrix = vector<float>(16, 0);
 	float fFrustumScale = 1.0f;
+
+	gfx::Matrix<4, 4, float> perspectiveMatrix;
+
+	gfx::Scalar<float> frustumScale = 1.0f;
 
 private:
 
@@ -54,14 +60,14 @@ public:
 
 		float fzNear = 0.5f; float fzFar = 3.0f;
 
-			perspectiveMatrix[0] = fFrustumScale;
-			perspectiveMatrix[5] = fFrustumScale;
-			perspectiveMatrix[10] = (fzFar + fzNear) / (fzNear - fzFar);
-			perspectiveMatrix[14] = (2 * fzFar * fzNear) / (fzNear - fzFar);
-			perspectiveMatrix[11] = -1.0f;
+		perspectiveMatrix.at(0,0) = fFrustumScale;
+		perspectiveMatrix.at(1,1) = fFrustumScale;
+		perspectiveMatrix.at(2,2) = (fzFar + fzNear) / (fzNear - fzFar);
+		perspectiveMatrix.at(2,3) = (2 * fzFar * fzNear) / (fzNear - fzFar);
+		perspectiveMatrix.at(3,2) = -1.0f;
 
 		glUseProgram(*program);
-		glUniformMatrix4fv(program->getUniformHandle("perspectiveMatrix"), 1, GL_FALSE, perspectiveMatrix.data());
+		glUniformMatrix4fv(program->getUniformHandle("perspectiveMatrix"), 1, GL_TRUE, perspectiveMatrix.data());
 		glUseProgram(0);
 
 		buffer = make_shared<gfx::GenericBuffer>();
@@ -174,11 +180,11 @@ public:
 
 	virtual void onReshape(int width, int height) {
 
-		perspectiveMatrix[0] = fFrustumScale / (width / (float)height);
-		perspectiveMatrix[5] = fFrustumScale;
+		perspectiveMatrix.at(0,0) = fFrustumScale / (width / (float)height);
+		perspectiveMatrix.at(1,1) = fFrustumScale;
 
 		glUseProgram(*program);
-		glUniformMatrix4fv(program->getUniformHandle("perspectiveMatrix"), 1, GL_FALSE, perspectiveMatrix.data());
+		glUniformMatrix4fv(program->getUniformHandle("perspectiveMatrix"), 1, GL_TRUE, perspectiveMatrix.data());
 		glUseProgram(0);
 
 		glViewport(0, 0, (GLsizei) width, (GLsizei) height);
@@ -198,7 +204,11 @@ public:
 
 		glUseProgram(*program);
 
-		glUniform1f(program->getUniformHandle("loopDuration"), 5.0f);
+		float num = 5.0f;
+
+		glUniform1fv(program->getUniformHandle("loopDuration"), 1, &num);
+
+//		glUniform1f(program->getUniformHandle("loopDuration"), 5.0f);
 		glUniform1f(program->getUniformHandle("time"), glutGet(GLUT_ELAPSED_TIME) / 1000.0f);
 
 		glBindBuffer(GL_ARRAY_BUFFER, *buffer);
