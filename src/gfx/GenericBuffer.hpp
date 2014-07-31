@@ -31,6 +31,14 @@ public:
 		glDeleteBuffers(1, &_handle);
 	}
 
+	void bind(GLenum target) {
+		glBindBuffer(target, _handle);
+	}
+
+	void unbind(GLenum target) {
+		glBindBuffer(target, 0);
+	}
+
 	unsigned int size() {
 		return _size;
 	}

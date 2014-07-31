@@ -30,16 +30,14 @@ class Application : public ApplicationBase, public util::Singleton<Application> 
 	friend class util::Singleton<Application>;
 
 private:
+
 	shared_ptr<shader::Program> program = nullptr;
 	shared_ptr<gfx::GenericBuffer> buffer = nullptr;
 
 	GLuint vao = 0;
 
-	float fFrustumScale = 1.0f;
-
 	gfx::Matrix<4, 4, float> perspectiveMatrix;
-
-	gfx::Scalar<float> frustumScale = 1.0f;
+	float fFrustumScale = 1.0f;
 
 private:
 
@@ -67,9 +65,9 @@ public:
 		perspectiveMatrix.at(2,3) = (2 * fzFar * fzNear) / (fzNear - fzFar);
 		perspectiveMatrix.at(3,2) = -1.0f;
 
-		glUseProgram(*program);
+		program->use();
 		program->uniform("perspectiveMatrix") = perspectiveMatrix;
-		glUseProgram(0);
+		program->dispose();
 
 		buffer = make_shared<gfx::GenericBuffer>();
 		buffer->realloc({
@@ -184,10 +182,9 @@ public:
 		perspectiveMatrix.at(0,0) = fFrustumScale / (width / (float)height);
 		perspectiveMatrix.at(1,1) = fFrustumScale;
 
-		glUseProgram(*program);
-//		glUniformMatrix4fv(program->getUniformHandle("perspectiveMatrix"), 1, GL_TRUE, perspectiveMatrix.data());
+		program->use();
 		program->uniform("perspectiveMatrix") = perspectiveMatrix;
-		glUseProgram(0);
+		program->dispose();
 
 		glViewport(0, 0, (GLsizei) width, (GLsizei) height);
 	}
@@ -204,13 +201,13 @@ public:
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(*program);
+		program->use();
 
 		program->uniform("loopDuration") = 5.0f;
-
 		program->uniform("time") = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 
-		glBindBuffer(GL_ARRAY_BUFFER, *buffer);
+		buffer->bind(GL_ARRAY_BUFFER);
+
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
@@ -220,7 +217,9 @@ public:
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
-		glUseProgram(0);
+
+		buffer->unbind(GL_ARRAY_BUFFER);
+		program->dispose();
 
 		glutSwapBuffers();
 		glutPostRedisplay();

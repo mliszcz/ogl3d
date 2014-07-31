@@ -51,6 +51,14 @@ public:
 		glDeleteProgram(_handle);
 	}
 
+	void use() {
+		glUseProgram(_handle);
+	}
+
+	void dispose() {
+		glUseProgram(0);
+	}
+
 private:
 
 	GLint getProgramiv(GLuint program, GLenum pname) {
