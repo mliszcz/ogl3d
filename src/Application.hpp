@@ -26,6 +26,7 @@
 #include "gfx/type/Vector.hpp"
 #include "gfx/type/Scalar.hpp"
 
+#include "gfx/MatrixStack.hpp"
 #include "gfx/Mesh.hpp"
 
 class Application : public ApplicationBase, public util::Singleton<Application> {
@@ -42,6 +43,8 @@ private:
 
 	shared_ptr<gfx::Mesh> mesh1 = nullptr;
 	shared_ptr<gfx::Mesh> mesh2 = nullptr;
+
+	gfx::MatrixStack<4, 4, float> matrixStack;
 
 private:
 
