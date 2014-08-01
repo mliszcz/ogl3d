@@ -34,4 +34,16 @@ using std::length_error;
 //#include "gfx/type/Vector.hpp"
 //#include "gfx/type/Scalar.hpp"
 
+namespace util {
+
+inline void CheckError() {
+	GLenum errorCode = glGetError();
+	if (errorCode != GL_NO_ERROR) {
+		const char* errorString = reinterpret_cast<const char*>(gluErrorString(errorCode));
+		throw logic_error(string("OpenGL error: ") + string(errorString));
+	}
+}
+
+}
+
 #endif /* COMMON_HPP_ */

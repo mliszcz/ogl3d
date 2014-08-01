@@ -66,11 +66,18 @@ protected:
 
 		glewExperimental = GL_TRUE; // required on i5-4200u/HD4400 & Mesa 10.1.3
 		GLenum res = glewInit();
-		if (res != GLEW_OK) {
-			fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
-		}
 
-//		glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
+		if (res != GLEW_OK)
+			throw logic_error("GLEW error: " +
+					string(reinterpret_cast<const char*>(glewGetErrorString(res))));
+
+		/*
+		 * empty OpenGL error flag
+		 * it is raised due to glewExperimental set to TRUE
+		 * and can be safely ignored
+		 * http://stackoverflow.com/questions/10857335/opengl-glgeterror-returns-invalid-enum-after-call-to-glewinit
+		 */
+		glGetError();
 
 		/*
 		 * static wrappers are needed, cause opengl is crappy

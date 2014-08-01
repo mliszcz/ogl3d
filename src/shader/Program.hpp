@@ -35,8 +35,6 @@ public:
 		glLinkProgram(_handle);
 
 		if (getProgramiv(_handle, GL_LINK_STATUS) == GL_FALSE) {
-//			util::Logger::getInstance()->
-//					error("failed to link the program:\n%s\n", getProgramInfoLog(_handle).c_str());
 			throw logic_error("failed to link the program:\n" + getProgramInfoLog(_handle));
 		}
 

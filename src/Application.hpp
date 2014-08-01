@@ -26,18 +26,22 @@
 #include "gfx/type/Vector.hpp"
 #include "gfx/type/Scalar.hpp"
 
+#include "gfx/Mesh.hpp"
+
 class Application : public ApplicationBase, public util::Singleton<Application> {
 	friend class util::Singleton<Application>;
 
 private:
 
 	shared_ptr<shader::Program> program = nullptr;
-	shared_ptr<gfx::GenericBuffer> buffer = nullptr;
 
-	GLuint vao = 0;
+//	GLuint vao = 0;
 
 	gfx::Matrix<4, 4, float> perspectiveMatrix;
 	float fFrustumScale = 1.0f;
+
+	shared_ptr<gfx::Mesh> mesh1 = nullptr;
+	shared_ptr<gfx::Mesh> mesh2 = nullptr;
 
 private:
 
@@ -50,6 +54,10 @@ public:
 
 	virtual void onInit() {
 
+
+		mesh1 = gfx::Mesh::fromFile("res/models/model01.mesh");
+		mesh2 = gfx::Mesh::fromFile("res/models/model02.mesh");
+
 		auto shaders = {
 				shader::VertexShader::fromFile("res/shaders/simple.vert"),
 				shader::FragmentShader::fromFile("res/shaders/simple.frag")
@@ -57,7 +65,9 @@ public:
 
 		program = make_shared<shader::Program>(shaders);
 
-		float fzNear = 0.5f; float fzFar = 3.0f;
+
+
+		float fzNear = 1.0f; float fzFar = 3.0f;
 
 		perspectiveMatrix.at(0,0) = fFrustumScale;
 		perspectiveMatrix.at(1,1) = fFrustumScale;
@@ -69,117 +79,22 @@ public:
 		program->uniform("perspectiveMatrix") = perspectiveMatrix;
 		program->dispose();
 
-		buffer = make_shared<gfx::GenericBuffer>();
-		buffer->realloc({
-			 0.25f,  0.25f, -1.25f, 1.0f,
-			 0.25f, -0.25f, -1.25f, 1.0f,
-			-0.25f,  0.25f, -1.25f, 1.0f,
-
-			 0.25f, -0.25f, -1.25f, 1.0f,
-			-0.25f, -0.25f, -1.25f, 1.0f,
-			-0.25f,  0.25f, -1.25f, 1.0f,
-
-			 0.25f,  0.25f, -2.75f, 1.0f,
-			-0.25f,  0.25f, -2.75f, 1.0f,
-			 0.25f, -0.25f, -2.75f, 1.0f,
-
-			 0.25f, -0.25f, -2.75f, 1.0f,
-			-0.25f,  0.25f, -2.75f, 1.0f,
-			-0.25f, -0.25f, -2.75f, 1.0f,
-
-			-0.25f,  0.25f, -1.25f, 1.0f,
-			-0.25f, -0.25f, -1.25f, 1.0f,
-			-0.25f, -0.25f, -2.75f, 1.0f,
-
-			-0.25f,  0.25f, -1.25f, 1.0f,
-			-0.25f, -0.25f, -2.75f, 1.0f,
-			-0.25f,  0.25f, -2.75f, 1.0f,
-
-			 0.25f,  0.25f, -1.25f, 1.0f,
-			 0.25f, -0.25f, -2.75f, 1.0f,
-			 0.25f, -0.25f, -1.25f, 1.0f,
-
-			 0.25f,  0.25f, -1.25f, 1.0f,
-			 0.25f,  0.25f, -2.75f, 1.0f,
-			 0.25f, -0.25f, -2.75f, 1.0f,
-
-			 0.25f,  0.25f, -2.75f, 1.0f,
-			 0.25f,  0.25f, -1.25f, 1.0f,
-			-0.25f,  0.25f, -1.25f, 1.0f,
-
-			 0.25f,  0.25f, -2.75f, 1.0f,
-			-0.25f,  0.25f, -1.25f, 1.0f,
-			-0.25f,  0.25f, -2.75f, 1.0f,
-
-			 0.25f, -0.25f, -2.75f, 1.0f,
-			-0.25f, -0.25f, -1.25f, 1.0f,
-			 0.25f, -0.25f, -1.25f, 1.0f,
-
-			 0.25f, -0.25f, -2.75f, 1.0f,
-			-0.25f, -0.25f, -2.75f, 1.0f,
-			-0.25f, -0.25f, -1.25f, 1.0f,
-
-			0.0f, 0.0f, 1.0f, 1.0f,
-			0.0f, 0.0f, 1.0f, 1.0f,
-			0.0f, 0.0f, 1.0f, 1.0f,
-
-			0.0f, 0.0f, 1.0f, 1.0f,
-			0.0f, 0.0f, 1.0f, 1.0f,
-			0.0f, 0.0f, 1.0f, 1.0f,
-
-			0.8f, 0.8f, 0.8f, 1.0f,
-			0.8f, 0.8f, 0.8f, 1.0f,
-			0.8f, 0.8f, 0.8f, 1.0f,
-
-			0.8f, 0.8f, 0.8f, 1.0f,
-			0.8f, 0.8f, 0.8f, 1.0f,
-			0.8f, 0.8f, 0.8f, 1.0f,
-
-			0.0f, 1.0f, 0.0f, 1.0f,
-			0.0f, 1.0f, 0.0f, 1.0f,
-			0.0f, 1.0f, 0.0f, 1.0f,
-
-			0.0f, 1.0f, 0.0f, 1.0f,
-			0.0f, 1.0f, 0.0f, 1.0f,
-			0.0f, 1.0f, 0.0f, 1.0f,
-
-			0.5f, 0.5f, 0.0f, 1.0f,
-			0.5f, 0.5f, 0.0f, 1.0f,
-			0.5f, 0.5f, 0.0f, 1.0f,
-
-			0.5f, 0.5f, 0.0f, 1.0f,
-			0.5f, 0.5f, 0.0f, 1.0f,
-			0.5f, 0.5f, 0.0f, 1.0f,
-
-			1.0f, 0.0f, 0.0f, 1.0f,
-			1.0f, 0.0f, 0.0f, 1.0f,
-			1.0f, 0.0f, 0.0f, 1.0f,
-
-			1.0f, 0.0f, 0.0f, 1.0f,
-			1.0f, 0.0f, 0.0f, 1.0f,
-			1.0f, 0.0f, 0.0f, 1.0f,
-
-			0.0f, 1.0f, 1.0f, 1.0f,
-			0.0f, 1.0f, 1.0f, 1.0f,
-			0.0f, 1.0f, 1.0f, 1.0f,
-
-			0.0f, 1.0f, 1.0f, 1.0f,
-			0.0f, 1.0f, 1.0f, 1.0f,
-			0.0f, 1.0f, 1.0f, 1.0f,
-
-		});
-
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
+//		glGenVertexArrays(1, &vao);
+//		glBindVertexArray(vao);
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		glFrontFace(GL_CW);
+
+//		glEnable(GL_DEPTH_TEST);
+//		glDepthMask(GL_TRUE);
+//		glDepthFunc(GL_LESS);
+//		glDepthRange(0.0f, 1.0f);
 	}
 
 	virtual void onReshape(int width, int height) {
 
-		perspectiveMatrix.at(0,0) = fFrustumScale / (width / (float)height);
+		perspectiveMatrix.at(0,0) = fFrustumScale / ((float) width/height);
 		perspectiveMatrix.at(1,1) = fFrustumScale;
 
 		program->use();
@@ -199,30 +114,28 @@ public:
 
 	virtual void onDisplay() {
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+//		glClearDepth(1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);// | GL_DEPTH_BUFFER_BIT);
 
 		program->use();
 
-		program->uniform("loopDuration") = 5.0f;
-		program->uniform("time") = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+		mesh1->bindVAO();
+		program->uniform("offset") = gfx::Vector<3, float>{0.0f, 0.0f, 0.0f};
+		glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, 0);
 
-		buffer->bind(GL_ARRAY_BUFFER);
+		mesh2->bindVAO();
+		program->uniform("offset") = gfx::Vector<3, float>{0.0f, 0.0f, -1.0f};
+		glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, 0);
 
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*buffer->size()/2));
+		mesh2->unbindVAO();
 
-		glDrawArrays(GL_TRIANGLES, 0, buffer->size()/2/4);
-
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
-
-		buffer->unbind(GL_ARRAY_BUFFER);
 		program->dispose();
 
 		glutSwapBuffers();
-		glutPostRedisplay();
+
+		static bool once = true;
+		if(once) glutPostRedisplay();
+		once = false;
 	}
 
 };

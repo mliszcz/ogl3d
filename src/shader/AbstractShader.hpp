@@ -49,8 +49,7 @@ private:
 		glCompileShader(_handle);
 
 		if (getShaderiv(_handle, GL_COMPILE_STATUS) == GL_FALSE) {
-			util::Logger::getInstance()->
-					error("failed to compile the shader:\n%s\n", getShaderInfoLog(_handle).c_str());
+			throw logic_error("failed to compile the shader:\n" + getShaderInfoLog(_handle) + "\nsource\n" + source);
 		}
 	}
 };
