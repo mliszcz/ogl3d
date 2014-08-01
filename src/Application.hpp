@@ -90,6 +90,7 @@ public:
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
 		glDepthRange(0.0f, 1.0f); // Z-mapping from NDC to window-space
+		glEnable(GL_DEPTH_CLAMP);
 	}
 
 	virtual void onReshape(int width, int height) {
@@ -119,15 +120,11 @@ public:
 
 		program->use();
 
-		mesh1->bindVAO();
-		program->uniform("offset") = gfx::Vector<3, float>{0.0f, 0.0f, 0.0f};
-		glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, 0);
+		program->uniform("offset") = gfx::Vector<3, float>{0.0f, 0.0f, 0.5f};
+		mesh1->draw();
 
-		mesh2->bindVAO();
 		program->uniform("offset") = gfx::Vector<3, float>{0.0f, 0.0f, -1.0f};
-		glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_SHORT, 0);
-
-		mesh2->unbindVAO();
+		mesh2->draw();
 
 		program->dispose();
 
