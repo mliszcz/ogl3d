@@ -86,10 +86,10 @@ public:
 		glCullFace(GL_BACK);
 		glFrontFace(GL_CW);
 
-//		glEnable(GL_DEPTH_TEST);
-//		glDepthMask(GL_TRUE);
-//		glDepthFunc(GL_LESS);
-//		glDepthRange(0.0f, 1.0f);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+		glDepthFunc(GL_LESS);
+		glDepthRange(0.0f, 1.0f); // Z-mapping from NDC to window-space
 	}
 
 	virtual void onReshape(int width, int height) {
@@ -114,8 +114,8 @@ public:
 
 	virtual void onDisplay() {
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-//		glClearDepth(1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);// | GL_DEPTH_BUFFER_BIT);
+		glClearDepth(1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		program->use();
 
