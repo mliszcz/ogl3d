@@ -10,7 +10,14 @@
 
 #include "../../Common.hpp"
 
+//#include "Vector.hpp"
+
 namespace gfx {
+
+// have no fuckin idea why this works ...
+// Vector is incomplete-type here (??)
+template<unsigned int dim, typename T>
+class Vector;
 
 template <unsigned int rows, unsigned int cols, typename T>
 class Matrix {
@@ -49,19 +56,27 @@ public:
 		return mat;
 	}
 
-	static Matrix<4, 4, T> Translation(T dx, T dy, T dz) {
+	static Matrix<4, 4, T> Translation(const Vector<3, T>& v) {
+		return Translation(v.data()[0], v.data()[1], v.data()[2]);
+	}
+
+	static Matrix<4, 4, T> Translation(T t1, T t2, T t3) {
 		Matrix<4, 4, T> mat = Identity();
-		mat.at(0,3) = dx;
-		mat.at(1,3) = dy;
-		mat.at(2,3) = dz;
+		mat.at(0,3) = t1;
+		mat.at(1,3) = t2;
+		mat.at(2,3) = t3;
 		return mat;
 	}
 
-	static Matrix<4, 4, T> Scale(T sx, T sy, T sz) {
+	static Matrix<4, 4, T> Scale(const Vector<3, T>& v) {
+		return Scale(v.data()[0], v.data()[1], v.data()[2]);
+	}
+
+	static Matrix<4, 4, T> Scale(T s1, T s2, T s3) {
 		Matrix<4, 4, T> mat = Identity();
-		mat.at(0,0) = sx;
-		mat.at(1,1) = sy;
-		mat.at(2,2) = sz;
+		mat.at(0,0) = s1;
+		mat.at(1,1) = s2;
+		mat.at(2,2) = s3;
 		return mat;
 	}
 

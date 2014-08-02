@@ -14,6 +14,7 @@
 #include <fstream>
 
 #include "../Common.hpp"
+#include "GenericBuffer.hpp"
 
 namespace gfx {
 
@@ -60,6 +61,12 @@ private:
 		glBindVertexArray(0);
 	}
 
+public:
+
+	unsigned int size() {
+		return _sizeIndex;
+	}
+
 	void bindVAO() {
 		glBindVertexArray(vertexArrayObject);
 	}
@@ -68,16 +75,8 @@ private:
 		glBindVertexArray(0);
 	}
 
-public:
-
-	unsigned int size() {
-		return _sizeIndex;
-	}
-
 	void draw() {
-		bindVAO();
 		glDrawElements(GL_TRIANGLES, size(), GL_UNSIGNED_SHORT, 0);
-		unbindVAO();
 	}
 
 	static shared_ptr<Mesh> fromFile(string fileName) {

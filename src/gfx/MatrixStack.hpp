@@ -21,7 +21,7 @@ class MatrixStack {
 private:
 
 	stack<TMatrix> matrices;
-	TMatrix current;
+	TMatrix current = TMatrix::Identity();
 
 public:
 
@@ -42,10 +42,12 @@ public:
 		if (rows != cols) throw logic_error("non-square matrix multiplication");
 		TMatrix tmp;
 
+		TMatrix& matrix_nc = const_cast<TMatrix&>(matrix);
+
 		for (int i=0; i<rows; i++)
 			for (int j=0; j<cols; j++)
 				for (int k=0; k <rows; ++k)
-					tmp.at(i,j) = current.at(i,k) * matrix.at(k,j);
+					tmp.at(i,j) += current.at(i,k) * matrix_nc.at(k,j);
 
 		current = tmp;
 	}

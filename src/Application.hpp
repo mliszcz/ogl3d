@@ -29,22 +29,36 @@
 #include "gfx/MatrixStack.hpp"
 #include "gfx/Mesh.hpp"
 
+#include "Hierarchy.hpp"
+
 class Application : public ApplicationBase, public util::Singleton<Application> {
 	friend class util::Singleton<Application>;
 
 private:
 
+	float CalcFrustumScale(float fFovDeg)
+	{
+		const float degToRad = 3.14159f * 2.0f / 360.0f;
+		float fFovRad = fFovDeg * degToRad;
+		return 1.0f / tan(fFovRad / 2.0f);
+	}
+
 	shared_ptr<shader::Program> program = nullptr;
 
-//	GLuint vao = 0;
+	gfx::Matrix<4, 4, float> cameraToClipMatrix;
 
 	gfx::Matrix<4, 4, float> perspectiveMatrix;
-	float fFrustumScale = 1.0f;
+	float fFrustumScale = CalcFrustumScale(45.0f);
 
 	shared_ptr<gfx::Mesh> mesh1 = nullptr;
 	shared_ptr<gfx::Mesh> mesh2 = nullptr;
 
 	gfx::MatrixStack<4, 4, float> matrixStack;
+
+	shared_ptr<gfx::Mesh> hierarchyMesh = nullptr;
+
+	shared_ptr<Hierarchy> g_armature = nullptr;
+
 
 private:
 
@@ -57,9 +71,14 @@ public:
 
 	virtual void onInit() {
 
+//		matrixStack.mul(gfx::Matrix<4, 4, float>::Translation(1.0f, 1.0f, -20.0f));
+//		matrixStack.mul(gfx::Matrix<4, 4, float>::RotationY(45.0f));
+//		matrixStack.mul(gfx::Matrix<4, 4, float>::RotationX(45.0f));
+
 
 		mesh1 = gfx::Mesh::fromFile("res/models/model01.mesh");
 		mesh2 = gfx::Mesh::fromFile("res/models/model02.mesh");
+		hierarchyMesh = gfx::Mesh::fromFile("res/models/hierarchy.mesh");
 
 		auto shaders = {
 				shader::VertexShader::fromFile("res/shaders/simple.vert"),
@@ -70,20 +89,20 @@ public:
 
 
 
-		float fzNear = 1.0f; float fzFar = 3.0f;
+		float fzNear = 1.0f; float fzFar = 100.0f;
 
-		perspectiveMatrix.at(0,0) = fFrustumScale;
-		perspectiveMatrix.at(1,1) = fFrustumScale;
-		perspectiveMatrix.at(2,2) = (fzFar + fzNear) / (fzNear - fzFar);
-		perspectiveMatrix.at(2,3) = (2 * fzFar * fzNear) / (fzNear - fzFar);
-		perspectiveMatrix.at(3,2) = -1.0f;
+		cameraToClipMatrix.at(0,0) = fFrustumScale;
+		cameraToClipMatrix.at(1,1) = fFrustumScale;
+		cameraToClipMatrix.at(2,2) = (fzFar + fzNear) / (fzNear - fzFar);
+		cameraToClipMatrix.at(2,3) = (2 * fzFar * fzNear) / (fzNear - fzFar);
+		cameraToClipMatrix.at(3,2) = -1.0f;
 
 		program->use();
-		program->uniform("perspectiveMatrix") = perspectiveMatrix;
+		program->uniform("cameraToClipMatrix") = cameraToClipMatrix;
+		program->uniform("modelToCameraMatrix") = matrixStack.top();
 		program->dispose();
 
-//		glGenVertexArrays(1, &vao);
-//		glBindVertexArray(vao);
+		g_armature = make_shared<Hierarchy>(program, hierarchyMesh);
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -91,18 +110,18 @@ public:
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LESS);
+		glDepthFunc(GL_LEQUAL);
 		glDepthRange(0.0f, 1.0f); // Z-mapping from NDC to window-space
-		glEnable(GL_DEPTH_CLAMP);
+//		glEnable(GL_DEPTH_CLAMP);
 	}
 
 	virtual void onReshape(int width, int height) {
 
-		perspectiveMatrix.at(0,0) = fFrustumScale / ((float) width/height);
-		perspectiveMatrix.at(1,1) = fFrustumScale;
+		cameraToClipMatrix.at(0,0) = fFrustumScale / ((float) width/height);
+		cameraToClipMatrix.at(1,1) = fFrustumScale;
 
 		program->use();
-		program->uniform("perspectiveMatrix") = perspectiveMatrix;
+		program->uniform("cameraToClipMatrix") = cameraToClipMatrix;
 		program->dispose();
 
 		glViewport(0, 0, (GLsizei) width, (GLsizei) height);
@@ -113,7 +132,22 @@ public:
 		case 27:
 			glutLeaveMainLoop();
 			return;
+		case 'a': g_armature->AdjBase(true); break;
+		case 'd': g_armature->AdjBase(false); break;
+		case 'w': g_armature->AdjUpperArm(false); break;
+		case 's': g_armature->AdjUpperArm(true); break;
+		case 'r': g_armature->AdjLowerArm(false); break;
+		case 'f': g_armature->AdjLowerArm(true); break;
+		case 't': g_armature->AdjWristPitch(false); break;
+		case 'g': g_armature->AdjWristPitch(true); break;
+		case 'z': g_armature->AdjWristRoll(true); break;
+		case 'c': g_armature->AdjWristRoll(false); break;
+		case 'q': g_armature->AdjFingerOpen(true); break;
+		case 'e': g_armature->AdjFingerOpen(false); break;
+		case 32: g_armature->WritePose(); break;
 		}
+
+		glutPostRedisplay();
 	}
 
 	virtual void onDisplay() {
@@ -121,15 +155,9 @@ public:
 		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		program->use();
+		g_armature->Draw();
 
-		program->uniform("offset") = gfx::Vector<3, float>{0.0f, 0.0f, 0.5f};
-		mesh1->draw();
-
-		program->uniform("offset") = gfx::Vector<3, float>{0.0f, 0.0f, -1.0f};
-		mesh2->draw();
-
-		program->dispose();
+		util::CheckError();
 
 		glutSwapBuffers();
 
