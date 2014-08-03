@@ -11,6 +11,9 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
 #include "../Common.hpp"
 #include "../gfx/type/Matrix.hpp"
 #include "../gfx/type/Vector.hpp"
@@ -35,15 +38,22 @@ private:
 
 	template <unsigned int dim, typename T>
 	void uniformVector(unsigned int count, const T* data) {
+		// no suitable template-specialization found
 		throw logic_error("unsupported operation");
 	}
 
 	template <unsigned int rows, unsigned int cols, typename T>
 	void uniformMatrix(unsigned int count, const T* data, bool transpose) {
+		// no suitable template-specialization found
 		throw logic_error("unsupported operation");
 	}
 
 public:
+
+	UniformVariable& operator=(const glm::mat4& m) {
+		glUniformMatrix4fv(_handle, 1, GL_FALSE, glm::value_ptr(m));
+		return *this;
+	}
 
 	template <unsigned int rows, unsigned int cols, typename T>
 	UniformVariable& operator=(const gfx::Matrix<rows, cols, T>& matrix) {

@@ -13,6 +13,7 @@
 
 namespace gfx {
 
+//[[deprecated("use glm instead")]]
 template <unsigned int dim, typename T>
 class Vector : public Matrix<dim, 1, T> {
 

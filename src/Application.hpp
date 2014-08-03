@@ -22,9 +22,7 @@
 
 #include "gfx/GenericBuffer.hpp"
 
-#include "gfx/type/Matrix.hpp"
-#include "gfx/type/Vector.hpp"
-#include "gfx/type/Scalar.hpp"
+#include "glm/glm.hpp"
 
 #include "gfx/MatrixStack.hpp"
 #include "gfx/Mesh.hpp"
@@ -36,24 +34,12 @@ class Application : public ApplicationBase, public util::Singleton<Application> 
 
 private:
 
-	float CalcFrustumScale(float fFovDeg)
-	{
-		const float degToRad = 3.14159f * 2.0f / 360.0f;
-		float fFovRad = fFovDeg * degToRad;
-		return 1.0f / tan(fFovRad / 2.0f);
-	}
-
 	shared_ptr<shader::Program> program = nullptr;
-
-	gfx::Matrix<4, 4, float> cameraToClipMatrix;
-
-	gfx::Matrix<4, 4, float> perspectiveMatrix;
-	float fFrustumScale = CalcFrustumScale(45.0f);
 
 	shared_ptr<gfx::Mesh> mesh1 = nullptr;
 	shared_ptr<gfx::Mesh> mesh2 = nullptr;
 
-	gfx::MatrixStack<4, 4, float> matrixStack;
+	gfx::MatrixStack matrixStack;
 
 	shared_ptr<gfx::Mesh> hierarchyMesh = nullptr;
 
@@ -71,11 +57,6 @@ public:
 
 	virtual void onInit() {
 
-//		matrixStack.mul(gfx::Matrix<4, 4, float>::Translation(1.0f, 1.0f, -20.0f));
-//		matrixStack.mul(gfx::Matrix<4, 4, float>::RotationY(45.0f));
-//		matrixStack.mul(gfx::Matrix<4, 4, float>::RotationX(45.0f));
-
-
 		mesh1 = gfx::Mesh::fromFile("res/models/model01.mesh");
 		mesh2 = gfx::Mesh::fromFile("res/models/model02.mesh");
 		hierarchyMesh = gfx::Mesh::fromFile("res/models/hierarchy.mesh");
@@ -86,21 +67,6 @@ public:
 		};
 
 		program = make_shared<shader::Program>(shaders);
-
-
-
-		float fzNear = 1.0f; float fzFar = 100.0f;
-
-		cameraToClipMatrix.at(0,0) = fFrustumScale;
-		cameraToClipMatrix.at(1,1) = fFrustumScale;
-		cameraToClipMatrix.at(2,2) = (fzFar + fzNear) / (fzNear - fzFar);
-		cameraToClipMatrix.at(2,3) = (2 * fzFar * fzNear) / (fzNear - fzFar);
-		cameraToClipMatrix.at(3,2) = -1.0f;
-
-		program->use();
-		program->uniform("cameraToClipMatrix") = cameraToClipMatrix;
-		program->uniform("modelToCameraMatrix") = matrixStack.top();
-		program->dispose();
 
 		g_armature = make_shared<Hierarchy>(program, hierarchyMesh);
 
@@ -117,11 +83,9 @@ public:
 
 	virtual void onReshape(int width, int height) {
 
-		cameraToClipMatrix.at(0,0) = fFrustumScale / ((float) width/height);
-		cameraToClipMatrix.at(1,1) = fFrustumScale;
-
 		program->use();
-		program->uniform("cameraToClipMatrix") = cameraToClipMatrix;
+		program->uniform("cameraToClipMatrix") =
+				glm::perspectiveFov(45.0f, (float)width, (float)height, 1.0f, 100.0f);
 		program->dispose();
 
 		glViewport(0, 0, (GLsizei) width, (GLsizei) height);

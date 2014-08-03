@@ -11,13 +11,11 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+#include "glm/glm.hpp"
+
 #include "Common.hpp"
 
 #include "shader/Program.hpp"
-
-#include "gfx/type/Matrix.hpp"
-#include "gfx/type/Vector.hpp"
-#include "gfx/type/Scalar.hpp"
 
 #include "gfx/MatrixStack.hpp"
 #include "gfx/Mesh.hpp"
@@ -28,24 +26,24 @@ public:
 	Hierarchy(shared_ptr<shader::Program> _program, shared_ptr<gfx::Mesh> _mesh)
 		: program(_program)
 		, mesh(_mesh)
-		, posBase(gfx::Vector<3, float>{3.0f, -5.0f, -40.0f})
+		, posBase(glm::vec3(3.0f, -5.0f, -40.0f))
 		, angBase(-45.0f)
-		, posBaseLeft(gfx::Vector<3, float>{2.0f, 0.0f, 0.0f})
-		, posBaseRight(gfx::Vector<3, float>{-2.0f, 0.0f, 0.0f})
+		, posBaseLeft(glm::vec3(2.0f, 0.0f, 0.0f))
+		, posBaseRight(glm::vec3(-2.0f, 0.0f, 0.0f))
 		, scaleBaseZ(3.0f)
 		, angUpperArm(-33.75f)
 		, sizeUpperArm(9.0f)
-		, posLowerArm(gfx::Vector<3, float>{0.0f, 0.0f, 8.0f})
+		, posLowerArm(glm::vec3(0.0f, 0.0f, 8.0f))
 		, angLowerArm(146.25f)
 		, lenLowerArm(5.0f)
 		, widthLowerArm(1.5f)
-		, posWrist(gfx::Vector<3, float>{0.0f, 0.0f, 5.0f})
+		, posWrist(glm::vec3(0.0f, 0.0f, 5.0f))
 		, angWristRoll(0.0f)
 		, angWristPitch(67.5f)
 		, lenWrist(2.0f)
 		, widthWrist(2.0f)
-		, posLeftFinger(gfx::Vector<3, float>{1.0f, 0.0f, 1.0f})
-		, posRightFinger(gfx::Vector<3, float>{-1.0f, 0.0f, 1.0f})
+		, posLeftFinger(glm::vec3(1.0f, 0.0f, 1.0f))
+		, posRightFinger(glm::vec3(-1.0f, 0.0f, 1.0f))
 		, angFingerOpen(180.0f)
 		, lenFinger(2.0f)
 		, widthFinger(0.5f)
@@ -54,19 +52,21 @@ public:
 
 	void Draw()
 	{
-		gfx::MatrixStack<4, 4, float> modelToCameraStack;
+		gfx::MatrixStack modelToCameraStack;
 
 		program->use();
 		mesh->bindVAO();
 
-		modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Translation(posBase));
-		modelToCameraStack.mul(gfx::Matrix<4, 4, float>::RotationY(angBase));
+		modelToCameraStack.translate(posBase);
+		modelToCameraStack.rotateY(angBase);
 
 		//Draw left base.
 		{
 			modelToCameraStack.push();
-			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Translation(posBaseLeft));
-			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Scale(1.0f, 1.0f, scaleBaseZ));
+			modelToCameraStack.translate(posBaseLeft);
+			modelToCameraStack.scale(1.0f, 1.0f, scaleBaseZ);
+//			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Translation(posBaseLeft));
+//			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Scale(1.0f, 1.0f, scaleBaseZ));
 			program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
 			mesh->draw();
 			modelToCameraStack.pop();
@@ -75,8 +75,10 @@ public:
 		//Draw right base.
 		{
 			modelToCameraStack.push();
-			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Translation(posBaseRight));
-			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Scale(1.0f, 1.0f, scaleBaseZ));
+			modelToCameraStack.translate(posBaseRight);
+			modelToCameraStack.scale(1.0f, 1.0f, scaleBaseZ);
+//			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Translation(posBaseRight));
+//			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Scale(1.0f, 1.0f, scaleBaseZ));
 			program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
 			mesh->draw();
 			modelToCameraStack.pop();
@@ -250,15 +252,17 @@ public:
 //		modelToCameraStack.Pop();
 //	}
 //
-	void DrawUpperArm(gfx::MatrixStack<4, 4, float> &modelToCameraStack)
+	void DrawUpperArm(gfx::MatrixStack &modelToCameraStack)
 	{
 		modelToCameraStack.push();
-		modelToCameraStack.mul(gfx::Matrix<4, 4, float>::RotationX(angUpperArm));
+		modelToCameraStack.rotateX(angUpperArm);
 
 		{
 			modelToCameraStack.push();
-			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Translation(0.0f, 0.0f, (sizeUpperArm / 2.0f) - 1.0f));
-			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Scale(1.0f, 1.0f, sizeUpperArm / 2.0f));
+			modelToCameraStack.translate(0.0f, 0.0f, (sizeUpperArm / 2.0f) - 1.0f);
+			modelToCameraStack.scale(1.0f, 1.0f, sizeUpperArm / 2.0f);
+//			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Translation(0.0f, 0.0f, (sizeUpperArm / 2.0f) - 1.0f));
+//			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Scale(1.0f, 1.0f, sizeUpperArm / 2.0f));
 			program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
 			mesh->draw();
 			modelToCameraStack.pop();
@@ -272,27 +276,27 @@ public:
 	shared_ptr<shader::Program> program;
 	shared_ptr<gfx::Mesh> mesh;
 
-	gfx::Vector<3, float>		posBase;
+	glm::vec3		posBase;
 	float			angBase;
 
-	gfx::Vector<3, float>		posBaseLeft, posBaseRight;
+	glm::vec3		posBaseLeft, posBaseRight;
 	float			scaleBaseZ;
 
 	float			angUpperArm;
 	float			sizeUpperArm;
 
-	gfx::Vector<3, float>		posLowerArm;
+	glm::vec3		posLowerArm;
 	float			angLowerArm;
 	float			lenLowerArm;
 	float			widthLowerArm;
 
-	gfx::Vector<3, float>		posWrist;
+	glm::vec3		posWrist;
 	float			angWristRoll;
 	float			angWristPitch;
 	float			lenWrist;
 	float			widthWrist;
 
-	gfx::Vector<3, float>		posLeftFinger, posRightFinger;
+	glm::vec3		posLeftFinger, posRightFinger;
 	float			angFingerOpen;
 	float			lenFinger;
 	float			widthFinger;

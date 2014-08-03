@@ -13,6 +13,7 @@
 
 namespace gfx {
 
+//[[deprecated("use glm instead")]]
 template <typename T>
 class Scalar : public Vector<1, T> {
 

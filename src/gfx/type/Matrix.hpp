@@ -19,6 +19,7 @@ namespace gfx {
 template<unsigned int dim, typename T>
 class Vector;
 
+//[[deprecated("use glm instead")]]
 template <unsigned int rows, unsigned int cols, typename T>
 class Matrix {
 
