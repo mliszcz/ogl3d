@@ -24,6 +24,7 @@
 
 #include "glm/glm.hpp"
 
+#include "gfx/Camera.hpp"
 #include "gfx/MatrixStack.hpp"
 #include "gfx/Mesh.hpp"
 
@@ -38,49 +39,14 @@ private:
 
 	shared_ptr<gfx::Mesh> car = nullptr;
 
-	glm::vec3 g_camTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::fquat g_orientation = glm::fquat(1.0f, 0.0f, 0.0f, 0.0f);
-	glm::vec3 g_sphereCamRelPos = glm::vec3(90.0f, 0.0f, 10.0f);
+	gfx::Camera camera = gfx::Camera(
+			glm::vec3(90.0f, 0.0f, 10.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f));
 
+	glm::fquat g_orientation = glm::fquat(1.0f, 0.0f, 0.0f, 0.0f);
 
 private:
 
-	glm::vec3 ResolveCamPosition()
-	{
-		gfx::MatrixStack tempMat;
-
-		float phi = util::DegToRad(g_sphereCamRelPos.x);
-		float theta = util::DegToRad(g_sphereCamRelPos.y + 90.0f);
-
-		float fSinTheta = sinf(theta);
-		float fCosTheta = cosf(theta);
-		float fCosPhi = cosf(phi);
-		float fSinPhi = sinf(phi);
-
-		glm::vec3 dirToCamera(fSinTheta * fCosPhi, fCosTheta, fSinTheta * fSinPhi);
-		return (dirToCamera * g_sphereCamRelPos.z) + g_camTarget;
-	}
-
-	glm::mat4 CalcLookAtMatrix(const glm::vec3 &cameraPt, const glm::vec3 &lookPt, const glm::vec3 &upPt)
-	{
-		glm::vec3 lookDir = glm::normalize(lookPt - cameraPt);
-		glm::vec3 upDir = glm::normalize(upPt);
-
-		glm::vec3 rightDir = glm::normalize(glm::cross(lookDir, upDir));
-		glm::vec3 perpUpDir = glm::cross(rightDir, lookDir);
-
-		glm::mat4 rotMat(1.0f);
-		rotMat[0] = glm::vec4(rightDir, 0.0f);
-		rotMat[1] = glm::vec4(perpUpDir, 0.0f);
-		rotMat[2] = glm::vec4(-lookDir, 0.0f);
-
-		rotMat = glm::transpose(rotMat);
-
-		glm::mat4 transMat(1.0f);
-		transMat[3] = glm::vec4(-cameraPt, 1.0f);
-
-		return rotMat * transMat;
-	}
 
 	void OffsetOrientation(const glm::vec3 &_axis, float fAngDeg)
 	{
@@ -96,21 +62,21 @@ private:
 //		switch(g_iOffset)
 //		{
 //		case MODEL_RELATIVE:
-//			g_orientation = g_orientation * offset;
+			g_orientation = g_orientation * offset;
 //			break;
 //		case WORLD_RELATIVE:
 //			g_orientation = offset * g_orientation;
 //			break;
 //		case CAMERA_RELATIVE:
 //			{
-				const glm::vec3 &camPos = ResolveCamPosition();
-				const glm::mat4 &camMat = CalcLookAtMatrix(camPos, g_camTarget, glm::vec3(0.0f, 1.0f, 0.0f));
-
-				glm::fquat viewQuat = glm::quat_cast(camMat);
-				glm::fquat invViewQuat = glm::conjugate(viewQuat);
-
-				const glm::fquat &worldQuat = (invViewQuat * offset * viewQuat);
-				g_orientation = worldQuat * g_orientation;
+//				const glm::vec3 &camPos = ResolveCamPosition();
+//				const glm::mat4 &camMat = CalcLookAtMatrix(camPos, g_camTarget, glm::vec3(0.0f, 1.0f, 0.0f));
+//
+//				glm::fquat viewQuat = glm::quat_cast(camMat);
+//				glm::fquat invViewQuat = glm::conjugate(viewQuat);
+//
+//				const glm::fquat &worldQuat = (invViewQuat * offset * viewQuat);
+//				g_orientation = worldQuat * g_orientation;
 //			}
 //			break;
 //		}
@@ -164,17 +130,17 @@ public:
 			glutLeaveMainLoop();
 			return;
 
-		case 'i': g_sphereCamRelPos.y -= 11.25f; break;
-		case 'k': g_sphereCamRelPos.y += 11.25f; break;
-		case 'j': g_sphereCamRelPos.x -= 11.25f; break;
-		case 'l': g_sphereCamRelPos.x += 11.25f; break;
-		case 'I': g_sphereCamRelPos.y -= 1.125f; break;
-		case 'K': g_sphereCamRelPos.y += 1.125f; break;
-		case 'J': g_sphereCamRelPos.x -= 1.125f; break;
-		case 'L': g_sphereCamRelPos.x += 1.125f; break;
+//		case 'i': g_sphereCamRelPos.y -= 11.25f; break;
+//		case 'k': g_sphereCamRelPos.y += 11.25f; break;
+//		case 'j': g_sphereCamRelPos.x -= 11.25f; break;
+//		case 'l': g_sphereCamRelPos.x += 11.25f; break;
+//		case 'I': g_sphereCamRelPos.y -= 1.125f; break;
+//		case 'K': g_sphereCamRelPos.y += 1.125f; break;
+//		case 'J': g_sphereCamRelPos.x -= 1.125f; break;
+//		case 'L': g_sphereCamRelPos.x += 1.125f; break;
 		}
 
-		g_sphereCamRelPos.y = glm::clamp(g_sphereCamRelPos.y, -78.75f, 10.0f);
+//		g_sphereCamRelPos.y = glm::clamp(g_sphereCamRelPos.y, -78.75f, 0.0f);
 
 		glutPostRedisplay();
 	}
@@ -184,23 +150,36 @@ public:
 	bool dragging = false;
 	virtual void onMouse(int button, int state, int x, int y) {
 
+		static int GLUT_WHEEL_UP = 3;
+		static int GLUT_WHEEL_DOWN = 4;
+
 		if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 			x0 = x;
 			y0 = y;
 			dragging = true;
 		}
+
 		if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 			dragging = false;
+
+		if (state == GLUT_UP ) {
+				if (button == GLUT_WHEEL_UP)
+					camera.sphericalPosition.z -= 1.0f;
+				else if(button == GLUT_WHEEL_DOWN)
+					camera.sphericalPosition.z += 1.0f;
+		}
+
+		glutPostRedisplay();
 	}
 
 	virtual void onMotion(int x, int y) {
 
 		if (dragging) {
 
-			g_sphereCamRelPos.y -= (y-y0)/1.0f;
-			g_sphereCamRelPos.x += (x-x0)/1.0f;
-
-			glm::clamp(g_sphereCamRelPos.y, -78.75f, 10.0f);
+			camera.sphericalPosition.y -= (y-y0)/1.0f;
+			camera.sphericalPosition.x += (x-x0)/1.0f;
+//
+			glm::clamp(camera.sphericalPosition.y, -78.75f, 0.0f);
 
 			x0 = x;
 			y0 = y;
@@ -214,9 +193,8 @@ public:
 		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		const glm::vec3 &camPos = ResolveCamPosition();
-		modelToCameraStack.set(CalcLookAtMatrix(camPos, g_camTarget, glm::vec3(0.0f, 1.0f, 0.0f)));
-		modelToCameraStack.translate(g_camTarget);
+		modelToCameraStack.set(camera.calculateLookAtMatrix());
+		modelToCameraStack.translate(camera.target());
 		modelToCameraStack.apply(glm::mat4_cast(g_orientation));
 
 		program->use();
