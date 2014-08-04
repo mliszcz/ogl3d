@@ -39,11 +39,13 @@ private:
 	shared_ptr<gfx::Mesh> mesh1 = nullptr;
 	shared_ptr<gfx::Mesh> mesh2 = nullptr;
 
-	gfx::MatrixStack matrixStack;
+	gfx::MatrixStack modelToCameraStack;
 
 	shared_ptr<gfx::Mesh> hierarchyMesh = nullptr;
 
 	shared_ptr<Hierarchy> g_armature = nullptr;
+
+	shared_ptr<gfx::Mesh> car = nullptr;
 
 
 private:
@@ -56,6 +58,11 @@ public:
 	virtual ~Application() { }
 
 	virtual void onInit() {
+
+		modelToCameraStack.translate(0, 0, -50);
+		modelToCameraStack.scale(0.2, 0.2, 0.2);
+
+		car = gfx::Mesh::fromObjFile("res/models/BMW/BMW_obj.obj");
 
 		mesh1 = gfx::Mesh::fromFile("res/models/model01.mesh");
 		mesh2 = gfx::Mesh::fromFile("res/models/model02.mesh");
@@ -119,7 +126,16 @@ public:
 		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		g_armature->Draw();
+//		g_armature->Draw();
+
+		program->use();
+
+		program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
+		car->bindVAO();
+		car->draw();
+		car->unbindVAO();
+
+		program->dispose();
 
 		util::CheckError();
 

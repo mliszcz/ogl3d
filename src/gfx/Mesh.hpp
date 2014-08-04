@@ -16,8 +16,11 @@
 #include "../Common.hpp"
 #include "GenericBuffer.hpp"
 
+#include "tinyobjloader/tiny_obj_loader.hpp"
+
 namespace gfx {
 
+// TODO allow more shapes in one mesh
 
 class Mesh {
 
@@ -31,7 +34,7 @@ private:
 	unsigned int _sizeIndex = 0;
 	unsigned int _sizeVertex = 0;
 
-	Mesh(const vector<float>& vertexData, const vector<short>& indexData) {
+	Mesh(const vector<float>& vertexData, const vector<unsigned int>& indexData) {
 
 		// magic numbers
 		// 3 components for position
@@ -76,7 +79,7 @@ public:
 	}
 
 	void draw() {
-		glDrawElements(GL_TRIANGLES, size(), GL_UNSIGNED_SHORT, 0);
+		glDrawElements(GL_TRIANGLES, size(), GL_UNSIGNED_INT, 0);
 	}
 
 	static shared_ptr<Mesh> fromFile(string fileName) {
@@ -89,15 +92,28 @@ public:
 		file >> numVertices >> numIndices;
 
 		vector<float> vertexData;
-		vector<short> indexData;
+		vector<unsigned int> indexData;
 
 		std::copy_n(std::istream_iterator<float>(file), 3*numVertices + 4*numVertices,
 				std::back_inserter(vertexData));
 
-		std::copy_n(std::istream_iterator<short>(file), 3*numIndices,
+		std::copy_n(std::istream_iterator<unsigned int>(file), 3*numIndices,
 				std::back_inserter(indexData));
 
 		return shared_ptr<Mesh>(new Mesh(vertexData, indexData));
+	}
+
+	static shared_ptr<Mesh> fromObjFile(string fileName) {
+
+		string inputfile = fileName;
+		vector<tinyobj::shape_t> shapes;
+
+		string err = tinyobj::LoadObj(shapes, inputfile.c_str());
+
+		if (!err.empty())
+			throw logic_error("failed to load model " + fileName);
+
+		return shared_ptr<Mesh>(new Mesh(shapes[0].mesh.positions, shapes[0].mesh.indices));
 	}
 };
 
