@@ -8,6 +8,12 @@
 #ifndef COMMON_HPP_
 #define COMMON_HPP_
 
+/*
+ * GLM: angleAxis function taking degrees as a parameter is deprecated.
+ * #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
+ */
+#define GLM_FORCE_RADIANS
+
 #include <initializer_list>
 #include <stdexcept>
 #include <algorithm>

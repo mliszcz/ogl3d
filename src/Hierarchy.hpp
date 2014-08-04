@@ -25,7 +25,7 @@ class Hierarchy
 public:
 	Hierarchy(shared_ptr<shader::Program> _program, shared_ptr<gfx::Mesh> _mesh)
 		: program(_program)
-		, mesh(_mesh)
+		, mesh(_mesh->at(0))
 		, posBase(glm::vec3(3.0f, -5.0f, -40.0f))
 		, angBase(-45.0f)
 		, posBaseLeft(glm::vec3(2.0f, 0.0f, 0.0f))
@@ -55,7 +55,7 @@ public:
 		gfx::MatrixStack modelToCameraStack;
 
 		program->use();
-		mesh->bindVAO();
+		mesh.bindVAO();
 
 		modelToCameraStack.translate(posBase);
 		modelToCameraStack.rotateY(angBase);
@@ -68,7 +68,7 @@ public:
 //			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Translation(posBaseLeft));
 //			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Scale(1.0f, 1.0f, scaleBaseZ));
 			program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
-			mesh->draw();
+			mesh.draw();
 			modelToCameraStack.pop();
 		}
 
@@ -80,14 +80,14 @@ public:
 //			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Translation(posBaseRight));
 //			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Scale(1.0f, 1.0f, scaleBaseZ));
 			program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
-			mesh->draw();
+			mesh.draw();
 			modelToCameraStack.pop();
 		}
 
 		//Draw main arm.
 		DrawUpperArm(modelToCameraStack);
 
-		mesh->unbindVAO();
+		mesh.unbindVAO();
 		program->dispose();
 	}
 
@@ -264,7 +264,7 @@ public:
 //			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Translation(0.0f, 0.0f, (sizeUpperArm / 2.0f) - 1.0f));
 //			modelToCameraStack.mul(gfx::Matrix<4, 4, float>::Scale(1.0f, 1.0f, sizeUpperArm / 2.0f));
 			program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
-			mesh->draw();
+			mesh.draw();
 			modelToCameraStack.pop();
 		}
 
@@ -274,7 +274,7 @@ public:
 	}
 
 	shared_ptr<shader::Program> program;
-	shared_ptr<gfx::Mesh> mesh;
+	gfx::Mesh::Component mesh;
 
 	glm::vec3		posBase;
 	float			angBase;

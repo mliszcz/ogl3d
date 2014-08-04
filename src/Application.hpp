@@ -59,10 +59,11 @@ public:
 
 	virtual void onInit() {
 
-		modelToCameraStack.translate(0, 0, -50);
+		modelToCameraStack.translate(0, 0, -30);
 		modelToCameraStack.scale(0.2, 0.2, 0.2);
 
 		car = gfx::Mesh::fromObjFile("res/models/BMW/BMW_obj.obj");
+//		car = gfx::Mesh::fromObjFile("res/models/mustang/mustang.obj");
 
 		mesh1 = gfx::Mesh::fromFile("res/models/model01.mesh");
 		mesh2 = gfx::Mesh::fromFile("res/models/model02.mesh");
@@ -75,7 +76,7 @@ public:
 
 		program = make_shared<shader::Program>(shaders);
 
-		g_armature = make_shared<Hierarchy>(program, hierarchyMesh);
+//		g_armature = make_shared<Hierarchy>(program, hierarchyMesh);
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -131,9 +132,7 @@ public:
 		program->use();
 
 		program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
-		car->bindVAO();
-		car->draw();
-		car->unbindVAO();
+		car->drawAll();
 
 		program->dispose();
 
