@@ -27,8 +27,6 @@
 #include "gfx/MatrixStack.hpp"
 #include "gfx/Mesh.hpp"
 
-#include "Hierarchy.hpp"
-
 class Application : public ApplicationBase, public util::Singleton<Application> {
 	friend class util::Singleton<Application>;
 
@@ -36,14 +34,7 @@ private:
 
 	shared_ptr<shader::Program> program = nullptr;
 
-	shared_ptr<gfx::Mesh> mesh1 = nullptr;
-	shared_ptr<gfx::Mesh> mesh2 = nullptr;
-
 	gfx::MatrixStack modelToCameraStack;
-
-	shared_ptr<gfx::Mesh> hierarchyMesh = nullptr;
-
-	shared_ptr<Hierarchy> g_armature = nullptr;
 
 	shared_ptr<gfx::Mesh> car = nullptr;
 
@@ -108,18 +99,18 @@ private:
 //			g_orientation = g_orientation * offset;
 //			break;
 //		case WORLD_RELATIVE:
-			g_orientation = offset * g_orientation;
+//			g_orientation = offset * g_orientation;
 //			break;
 //		case CAMERA_RELATIVE:
 //			{
-//				const glm::vec3 &camPos = ResolveCamPosition();
-//				const glm::mat4 &camMat = CalcLookAtMatrix(camPos, g_camTarget, glm::vec3(0.0f, 1.0f, 0.0f));
-//
-//				glm::fquat viewQuat = glm::quat_cast(camMat);
-//				glm::fquat invViewQuat = glm::conjugate(viewQuat);
-//
-//				const glm::fquat &worldQuat = (invViewQuat * offset * viewQuat);
-//				g_orientation = worldQuat * g_orientation;
+				const glm::vec3 &camPos = ResolveCamPosition();
+				const glm::mat4 &camMat = CalcLookAtMatrix(camPos, g_camTarget, glm::vec3(0.0f, 1.0f, 0.0f));
+
+				glm::fquat viewQuat = glm::quat_cast(camMat);
+				glm::fquat invViewQuat = glm::conjugate(viewQuat);
+
+				const glm::fquat &worldQuat = (invViewQuat * offset * viewQuat);
+				g_orientation = worldQuat * g_orientation;
 //			}
 //			break;
 //		}
@@ -136,15 +127,8 @@ public:
 
 	virtual void onInit() {
 
-		modelToCameraStack.translate(0, 0, -2);
-//		modelToCameraStack.scale(0.2, 0.2, 0.2);
-
 //		car = gfx::Mesh::fromObjFile("res/models/BMW/BMW_obj.obj");
 		car = gfx::Mesh::fromObjFile("res/models/mustang/mustang.obj");
-
-		mesh1 = gfx::Mesh::fromFile("res/models/model01.mesh");
-		mesh2 = gfx::Mesh::fromFile("res/models/model02.mesh");
-		hierarchyMesh = gfx::Mesh::fromFile("res/models/hierarchy.mesh");
 
 		auto shaders = {
 				shader::VertexShader::fromFile("res/shaders/simple.vert"),
@@ -152,8 +136,6 @@ public:
 		};
 
 		program = make_shared<shader::Program>(shaders);
-
-//		g_armature = make_shared<Hierarchy>(program, hierarchyMesh);
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -182,20 +164,6 @@ public:
 			glutLeaveMainLoop();
 			return;
 
-//		case 'a': g_armature->AdjBase(true); break;
-//		case 'd': g_armature->AdjBase(false); break;
-//		case 'w': g_armature->AdjUpperArm(false); break;
-//		case 's': g_armature->AdjUpperArm(true); break;
-//		case 'r': g_armature->AdjLowerArm(false); break;
-//		case 'f': g_armature->AdjLowerArm(true); break;
-//		case 't': g_armature->AdjWristPitch(false); break;
-//		case 'g': g_armature->AdjWristPitch(true); break;
-//		case 'z': g_armature->AdjWristRoll(true); break;
-//		case 'c': g_armature->AdjWristRoll(false); break;
-//		case 'q': g_armature->AdjFingerOpen(true); break;
-//		case 'e': g_armature->AdjFingerOpen(false); break;
-//		case 32: g_armature->WritePose(); break;
-
 		case 'i': g_sphereCamRelPos.y -= 11.25f; break;
 		case 'k': g_sphereCamRelPos.y += 11.25f; break;
 		case 'j': g_sphereCamRelPos.x -= 11.25f; break;
@@ -211,6 +179,36 @@ public:
 		glutPostRedisplay();
 	}
 
+	int x0 = 0;
+	int y0 = 0;
+	bool dragging = false;
+	virtual void onMouse(int button, int state, int x, int y) {
+
+		if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+			x0 = x;
+			y0 = y;
+			dragging = true;
+		}
+		if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+			dragging = false;
+	}
+
+	virtual void onMotion(int x, int y) {
+
+		if (dragging) {
+
+			g_sphereCamRelPos.y -= (y-y0)/1.0f;
+			g_sphereCamRelPos.x += (x-x0)/1.0f;
+
+			glm::clamp(g_sphereCamRelPos.y, -78.75f, 10.0f);
+
+			x0 = x;
+			y0 = y;
+
+			glutPostRedisplay();
+		}
+	}
+
 	virtual void onDisplay() {
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClearDepth(1.0f);
@@ -220,14 +218,12 @@ public:
 		modelToCameraStack.set(CalcLookAtMatrix(camPos, g_camTarget, glm::vec3(0.0f, 1.0f, 0.0f)));
 		modelToCameraStack.translate(g_camTarget);
 		modelToCameraStack.apply(glm::mat4_cast(g_orientation));
-//		modelToCameraStack.rotateX(-90);
-//		g_armature->Draw();
 
 		program->use();
 
 		program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
 
-		for (unsigned int i=2; i<car->size(); ++i) {
+		for (unsigned int i=1; i<car->size(); ++i) {
 			car->at(i).bindVAO();
 			car->at(i).draw();
 			car->at(i).unbindVAO();

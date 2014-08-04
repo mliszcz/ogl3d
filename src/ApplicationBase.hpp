@@ -37,7 +37,10 @@ public:
 	virtual void onInit() = 0;
 	virtual void onDisplay() = 0;
 	virtual void onReshape(int width, int height) = 0;
-	virtual void onKeyboard(unsigned char key, int x, int y) = 0;
+	virtual void onKeyboard(unsigned char key, int x, int y) { }
+	virtual void onMouse(int button, int state, int x, int y) { }
+	virtual void onMotion(int x, int y) { }
+	virtual void onPassiveMotion(int x, int y) { }
 
 	void run() {
 		glutMainLoop();
@@ -90,14 +93,23 @@ protected:
 		static std::function<void()>						fun_display;
 		static std::function<void(int, int)>				fun_reshape;
 		static std::function<void(unsigned char, int, int)>	fun_keyboard;
+		static std::function<void(int, int, int, int)>		fun_mouse;
+		static std::function<void(int, int)>				fun_motion;
+		static std::function<void(int, int)>				fun_passiveMotion;
 
 		fun_display = [this]() { this->onDisplay(); };
 		fun_reshape = [this](int w, int h) { this->onReshape(w, h); };
 		fun_keyboard = [this](unsigned char key, int x, int y) { this->onKeyboard(key, x, y); };
+		fun_mouse = [this](int btn, int state, int x, int y) { this->onMouse(btn, state, x, y); };
+		fun_motion = [this](int x, int y) { this->onMotion(x, y); };
+		fun_passiveMotion = [this](int x, int y) { this->onPassiveMotion(x, y); };
 
 		glutDisplayFunc([](){ fun_display(); });
 		glutReshapeFunc([](int w, int h){ fun_reshape(w, h); });
 		glutKeyboardFunc([](unsigned char key, int x, int y){ fun_keyboard(key, x, y); });
+		glutMouseFunc([](int btn, int state, int x, int y){ fun_mouse(btn, state, x, y); });
+		glutMotionFunc([](int x, int y){ fun_motion(x, y); });
+		glutPassiveMotionFunc([](int x, int y){ fun_passiveMotion(x, y); });
 	}
 
 };
