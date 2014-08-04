@@ -18,6 +18,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <iterator>
+#include <utility>
 #include <string>
 #include <vector>
 #include <memory>
@@ -29,6 +30,7 @@ using std::string;
 using std::vector;
 using std::shared_ptr;
 using std::make_shared;
+using std::pair;
 using std::stack;
 using std::list;
 using std::map;
@@ -38,7 +40,6 @@ using std::logic_error;
 using std::length_error;
 
 #include "GLObject.hpp"
-//#include "gfx/type/Matrix.hpp"
 
 
 namespace util {
@@ -49,6 +50,14 @@ inline void CheckError() {
 		const char* errorString = reinterpret_cast<const char*>(gluErrorString(errorCode));
 		throw logic_error(string("OpenGL error: ") + string(errorString));
 	}
+}
+
+inline float DegToRad(float deg) {
+	return deg * 3.1415f / 180.0f;
+}
+
+inline float RadToDeg(float rad) {
+	return rad * 180.0f / 3.1415f;
 }
 
 }

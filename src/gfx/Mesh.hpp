@@ -71,28 +71,28 @@ public:
 
 	public:
 
-		unsigned int size() {
+		unsigned int size() const {
 			return _sizeIndex;
 		}
 
-		void bindVAO() {
+		void bindVAO() const {
 			glBindVertexArray(vertexArrayObject);
 		}
 
-		void unbindVAO() {
+		void unbindVAO() const {
 			glBindVertexArray(0);
 		}
 
-		void draw() {
+		void draw() const {
 			glDrawElements(GL_TRIANGLES, size(), GL_UNSIGNED_INT, 0);
 		}
 	};
 
 private:
 
-	map<string, Component> components;
+	vector<pair<string, Component>> components;
 
-	Mesh(const map<string, Component>& meshComponents)
+	Mesh(const vector<pair<string, Component>>& meshComponents)
 		: components(meshComponents) { }
 
 public:
@@ -110,21 +110,20 @@ public:
 	}
 
 	const Component& operator[](unsigned int index) {
-		auto iter = components.begin();
-		std::advance(iter, index);
-		return iter->second;
+		return at(index);
 	}
 
 	const Component& at(unsigned int index) {
-		return (*this)[index];
+		return components.at(index).second;
 	}
 
 	const Component& operator[](const string& name) {
-		return components.at(name);
+		return at(name);
 	}
 
 	const Component& at(const string& name) {
-		return (*this)[name];
+		return std::find_if(components.begin(), components.end(),
+				[&](pair<string, Component>& p){ return p.first == name; })->second;
 	}
 
 	static shared_ptr<Mesh> fromFile(const string& fileName) {
@@ -160,10 +159,10 @@ public:
 		if (!err.empty())
 			throw logic_error("failed to load model " + fileName);
 
-		map<string, Component> components;
+		vector<pair<string, Component>> components;
 
 		for (auto& s : shapes)
-			components.emplace(s.name,Component(s.mesh.positions, s.mesh.indices));
+			components.emplace_back(s.name,Component(s.mesh.positions, s.mesh.indices));
 
 		return shared_ptr<Mesh>(new Mesh(components));
 	}

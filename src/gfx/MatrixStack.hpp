@@ -27,6 +27,14 @@ public:
 		return current;
 	}
 
+	void set(const glm::mat4& top) {
+		current = top;
+	}
+
+	void apply(const glm::mat4& mat) {
+		current *= mat;
+	}
+
 	void push() {
 		matrices.push(current);
 	}
