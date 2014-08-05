@@ -105,10 +105,10 @@ public:
 		void draw(shared_ptr<shader::Program> program) const {
 //			program->uniform("matKa") = material.Ka;
 			program->uniform("matKd") = material.Kd;
-//			program->uniform("matKs") = material.Ks;
+			program->uniform("matKs") = material.Ks;
 //			program->uniform("matTr") = material.Tr;
 //			program->uniform("matKe") = material.Ke;
-//			program->uniform("matNs") = material.Ns;
+			program->uniform("matNs") = material.Ns;
 			glDrawElements(GL_TRIANGLES, size(), GL_UNSIGNED_INT, 0);
 		}
 	};

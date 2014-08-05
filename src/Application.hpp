@@ -187,10 +187,10 @@ public:
 		modelToCameraStack.translate(camera.target);
 		modelToCameraStack.apply(glm::mat4_cast(g_orientation));
 
-		glm::vec4 lightDirCameraSpace = modelToCameraStack.top() * lightDirection;
+//		glm::vec4 lightDirCameraSpace = modelToCameraStack.top() * lightDirection;
 
 		program->use();
-		program->uniform("modelSpaceLightPos") = 30.0f*glm::vec3(0.5f, 1.0f, 0.5f);
+		program->uniform("modelSpaceLightPos") = 10.0f*glm::vec3(0.5f, 1.0f, 0.5f);
 //		program->uniform("dirToLight") = glm::vec3(lightDirCameraSpace);
 		program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
 //		program->uniform("normalModelToCameraMatrix") = glm::mat3(modelToCameraStack.top());

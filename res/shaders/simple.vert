@@ -9,6 +9,7 @@ layout(location = 1) in vec3 normal;
 out vec4 diffuseColor;
 out vec3 vertexNormal;
 out vec3 modelSpacePosition;
+out vec3 cameraSpacePosition;
 
 //uniform vec3 dirToLight;
 //uniform vec4 lightIntensity;
@@ -36,8 +37,11 @@ void main()
 	
 //	float cosAngIncidence = dot(normCamSpace, dirToLight);
 //	cosAngIncidence = clamp(cosAngIncidence, 0, 1);
+
+	vec4 tempCamPosition = (modelToCameraMatrix * vec4(position, 1.0));
 	
 	modelSpacePosition = position;
+	cameraSpacePosition = vec3(modelToCameraMatrix * vec4(position, 1.0));
 	vertexNormal = normal;
 	
 //	interpColor = lightIntensity * matKd * cosAngIncidence
