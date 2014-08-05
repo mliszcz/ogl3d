@@ -190,10 +190,10 @@ public:
 		glm::vec4 lightDirCameraSpace = modelToCameraStack.top() * lightDirection;
 
 		program->use();
-
-		program->uniform("dirToLight") = glm::vec3(lightDirCameraSpace);
+		program->uniform("modelSpaceLightPos") = 30.0f*glm::vec3(0.5f, 1.0f, 0.5f);
+//		program->uniform("dirToLight") = glm::vec3(lightDirCameraSpace);
 		program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
-		program->uniform("normalModelToCameraMatrix") = glm::mat3(modelToCameraStack.top());
+//		program->uniform("normalModelToCameraMatrix") = glm::mat3(modelToCameraStack.top());
 		program->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 		program->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
