@@ -20,8 +20,6 @@
 
 namespace gfx {
 
-// TODO allow more shapes in one mesh
-
 class Mesh {
 
 public:
@@ -39,30 +37,34 @@ public:
 		unsigned int _sizeIndex = 0;
 		unsigned int _sizeVertex = 0;
 
-		Component(const vector<float>& vertexData, const vector<unsigned int>& indexData) {
+		Component(
+				const vector<float>& vertexData,
+				const vector<float>& normalData,
+				const vector<unsigned int>& indexData) {
 
-			// magic numbers
-			// 3 components for position
-			// 4 components for color
+			vector<float> vbData;
+			std::copy(vertexData.begin(), vertexData.end(), std::back_inserter(vbData));
+			std::copy(normalData.begin(), normalData.end(), std::back_inserter(vbData));
+			std::fill_n(std::back_inserter(vbData), 4*vertexData.size()/3, 1.0f);			// ignore material and use lit diffuse color
 
 			_sizeIndex = indexData.size();
 			_sizeVertex = vertexData.size();
 
-			vertexBuffer.realloc(vertexData);
+			vertexBuffer.realloc(vbData);
 			indexBuffer.realloc(indexData);
 
 			glGenVertexArrays(1, &vertexArrayObject);
 			glBindVertexArray(vertexArrayObject);
 
-			size_t colorDataOffset = sizeof(float) * 3 * vertexData.size()/7;
-
 			vertexBuffer.bind(GL_ARRAY_BUFFER);
 
 			glEnableVertexAttribArray(0);
 			glEnableVertexAttribArray(1);
+			glEnableVertexAttribArray(2);
 
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*) colorDataOffset);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*) (sizeof(float)*vertexData.size()));
+			glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, (void*) (sizeof(float)*(vertexData.size()+normalData.size())));
 
 			indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
 
@@ -126,28 +128,28 @@ public:
 				[&](pair<string, Component>& p){ return p.first == name; })->second;
 	}
 
-	static shared_ptr<Mesh> fromFile(const string& fileName) {
-
-		std::ifstream file(fileName);
-
-		unsigned int numVertices = 0;
-		unsigned int numIndices = 0;
-
-		file >> numVertices >> numIndices;
-
-		vector<float> vertexData;
-		vector<unsigned int> indexData;
-
-		std::copy_n(std::istream_iterator<float>(file), 3*numVertices + 4*numVertices,
-				std::back_inserter(vertexData));
-
-		std::copy_n(std::istream_iterator<unsigned int>(file), 3*numIndices,
-				std::back_inserter(indexData));
-
-		return shared_ptr<Mesh>(new Mesh({
-			{"mesh", Component(vertexData, indexData)}
-		}));
-	}
+//	static shared_ptr<Mesh> fromFile(const string& fileName) {
+//
+//		std::ifstream file(fileName);
+//
+//		unsigned int numVertices = 0;
+//		unsigned int numIndices = 0;
+//
+//		file >> numVertices >> numIndices;
+//
+//		vector<float> vertexData;
+//		vector<unsigned int> indexData;
+//
+//		std::copy_n(std::istream_iterator<float>(file), 3*numVertices + 4*numVertices,
+//				std::back_inserter(vertexData));
+//
+//		std::copy_n(std::istream_iterator<unsigned int>(file), 3*numIndices,
+//				std::back_inserter(indexData));
+//
+//		return shared_ptr<Mesh>(new Mesh({
+//			{"mesh", Component(vertexData, vector<float>(), indexData)}
+//		}));
+//	}
 
 	static shared_ptr<Mesh> fromObjFile(const string& fileName) {
 
@@ -162,7 +164,7 @@ public:
 		vector<pair<string, Component>> components;
 
 		for (auto& s : shapes)
-			components.emplace_back(s.name,Component(s.mesh.positions, s.mesh.indices));
+			components.emplace_back(s.name,Component(s.mesh.positions, s.mesh.normals, s.mesh.indices));
 
 		return shared_ptr<Mesh>(new Mesh(components));
 	}

@@ -19,30 +19,19 @@ namespace gfx {
 
 class Camera {
 
-private:
-
-	glm::vec3 cameraTarget;
-
 public:
 
-	glm::vec3 sphericalPosition; // (phi, theta, r)
+	glm::vec3 target;
+	glm::vec3 position; // spherical coordinates (phi, theta, r)
 
-//	glm::fquat g_orientation = glm::fquat(1.0f, 0.0f, 0.0f, 0.0f);
-
-public:
-
-	Camera(const glm::vec3& position, const glm::vec3& target)
-		: cameraTarget(target), sphericalPosition(position) { }
-
-	const glm::vec3& target() {
-		return cameraTarget;
-	}
+	Camera(const glm::vec3& camPosition, const glm::vec3& camTarget)
+		: target(camTarget), position(camPosition) { }
 
 	glm::vec3 cameraPosition() {
 
-		float r 	= sphericalPosition.z;
-		float phi 	= util::DegToRad(sphericalPosition.x);
-		float theta = util::DegToRad(sphericalPosition.y + 90.0f);	// theta=0 on X-Z plane
+		float r 	= position.z;
+		float phi 	= util::DegToRad(position.x);
+		float theta = util::DegToRad(position.y + 90.0f);	// theta=0 on X-Z plane
 
 		float fSinTheta = sinf(theta);
 		float fCosTheta = cosf(theta);
@@ -58,13 +47,13 @@ public:
 		 */
 		glm::vec3 cartesianPosition = r * glm::vec3(fSinTheta*fCosPhi, fCosTheta, fSinTheta*fSinPhi);
 
-		return cartesianPosition + cameraTarget;
+		return cartesianPosition + target;
 	}
 
 	glm::mat4 calculateLookAtMatrix() {
 
 		return _calculateLookAtMatrix(cameraPosition(),
-				cameraTarget, glm::vec3(0.0f, 1.0f, 0.0f));
+				target, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 
 private:

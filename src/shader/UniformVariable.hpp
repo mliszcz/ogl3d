@@ -55,6 +55,21 @@ public:
 		return *this;
 	}
 
+	UniformVariable& operator=(const glm::mat3& m) {
+		glUniformMatrix3fv(_handle, 1, GL_FALSE, glm::value_ptr(m));
+		return *this;
+	}
+
+	UniformVariable& operator=(const glm::vec4& v) {
+		glUniform4fv(_handle, 1, glm::value_ptr(v));
+		return *this;
+	}
+
+	UniformVariable& operator=(const glm::vec3& v) {
+		glUniform3fv(_handle, 1, glm::value_ptr(v));
+		return *this;
+	}
+
 	template <unsigned int rows, unsigned int cols, typename T>
 	UniformVariable& operator=(const gfx::Matrix<rows, cols, T>& matrix) {
 		uniformMatrix<rows, cols, T>(1, matrix.data(), GL_TRUE);

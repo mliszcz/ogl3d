@@ -45,6 +45,8 @@ private:
 
 	glm::fquat g_orientation = glm::fquat(1.0f, 0.0f, 0.0f, 0.0f);
 
+	glm::vec4 lightDirection = glm::vec4(0.866f, 0.5f, 0.0f, 0.0f);
+
 private:
 
 
@@ -94,7 +96,11 @@ public:
 	virtual void onInit() {
 
 //		car = gfx::Mesh::fromObjFile("res/models/BMW/BMW_obj.obj");
-		car = gfx::Mesh::fromObjFile("res/models/mustang/mustang.obj");
+//		car = gfx::Mesh::fromObjFile("res/models/mustang/mustang.obj");
+//		car = gfx::Mesh::fromObjFile("res/models/dacia_obj/dacia.obj");
+		car = gfx::Mesh::fromObjFile("res/models/dacia_triang/dacia_triang.obj");
+
+
 
 		auto shaders = {
 				shader::VertexShader::fromFile("res/shaders/simple.vert"),
@@ -105,13 +111,13 @@ public:
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
-		glFrontFace(GL_CW);
+		glFrontFace(GL_CCW);
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LEQUAL);
 		glDepthRange(0.0f, 1.0f); // Z-mapping from NDC to window-space
-//		glEnable(GL_DEPTH_CLAMP);
+		glEnable(GL_DEPTH_CLAMP);
 	}
 
 	virtual void onReshape(int width, int height) {
@@ -164,9 +170,9 @@ public:
 
 		if (state == GLUT_UP ) {
 				if (button == GLUT_WHEEL_UP)
-					camera.sphericalPosition.z -= 1.0f;
+					camera.position.z -= 1.0f;
 				else if(button == GLUT_WHEEL_DOWN)
-					camera.sphericalPosition.z += 1.0f;
+					camera.position.z += 1.0f;
 		}
 
 		glutPostRedisplay();
@@ -176,10 +182,10 @@ public:
 
 		if (dragging) {
 
-			camera.sphericalPosition.y -= (y-y0)/1.0f;
-			camera.sphericalPosition.x += (x-x0)/1.0f;
-//
-			glm::clamp(camera.sphericalPosition.y, -78.75f, 0.0f);
+			camera.position.y -= (y-y0)/1.0f;
+			camera.position.x += (x-x0)/1.0f;
+
+			glm::clamp(camera.position.y, -78.75f, 0.0f);
 
 			x0 = x;
 			y0 = y;
@@ -194,14 +200,19 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		modelToCameraStack.set(camera.calculateLookAtMatrix());
-		modelToCameraStack.translate(camera.target());
+		modelToCameraStack.translate(camera.target);
 		modelToCameraStack.apply(glm::mat4_cast(g_orientation));
+
+		glm::vec4 lightDirCameraSpace = modelToCameraStack.top() * lightDirection;
 
 		program->use();
 
+		program->uniform("dirToLight") = glm::vec3(lightDirCameraSpace);
 		program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
+		program->uniform("normalModelToCameraMatrix") = glm::mat3(modelToCameraStack.top());
+		program->uniform("lightIntensity") = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-		for (unsigned int i=1; i<car->size(); ++i) {
+		for (unsigned int i=0; i<car->size(); ++i) {
 			car->at(i).bindVAO();
 			car->at(i).draw();
 			car->at(i).unbindVAO();
