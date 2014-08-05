@@ -199,10 +199,10 @@ public:
 
 		for (unsigned int i=0; i<car->size(); ++i) {
 			car->at(i).bindVAO();
-			car->at(i).draw();
+			car->at(i).draw(program);
 			car->at(i).unbindVAO();
 		}
-//		car->drawAll();
+//		car->drawAll(program);
 
 		program->dispose();
 

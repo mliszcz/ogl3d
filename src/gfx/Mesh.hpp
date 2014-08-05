@@ -16,6 +16,7 @@
 #include "../Common.hpp"
 #include "GenericBuffer.hpp"
 
+#include "glm/glm.hpp"
 #include "tinyobjloader/tiny_obj_loader.hpp"
 
 namespace gfx {
@@ -23,6 +24,17 @@ namespace gfx {
 class Mesh {
 
 public:
+
+	class Material {
+
+	public:
+		glm::vec4 	Ka;		// ambient
+		glm::vec4 	Kd;		// diffuse
+		glm::vec4 	Ks;		// specular
+		glm::vec4 	Tr;		// transmitance
+		glm::vec4 	Ke;		// emission
+		float 		Ns;
+	};
 
 	class Component {
 		friend class Mesh;
@@ -34,18 +46,23 @@ public:
 
 		GLuint vertexArrayObject;
 
+		Material material;
+
 		unsigned int _sizeIndex = 0;
 		unsigned int _sizeVertex = 0;
 
 		Component(
 				const vector<float>& vertexData,
 				const vector<float>& normalData,
-				const vector<unsigned int>& indexData) {
+				const vector<unsigned int>& indexData,
+				const Material& componentMaterial) {
+
+			material = componentMaterial;
 
 			vector<float> vbData;
 			std::copy(vertexData.begin(), vertexData.end(), std::back_inserter(vbData));
 			std::copy(normalData.begin(), normalData.end(), std::back_inserter(vbData));
-			std::fill_n(std::back_inserter(vbData), 4*vertexData.size()/3, 1.0f);			// ignore material and use lit diffuse color
+//			std::fill_n(std::back_inserter(vbData), 4*vertexData.size()/3, 1.0f);			// ignore material and use lit diffuse color
 
 			_sizeIndex = indexData.size();
 			_sizeVertex = vertexData.size();
@@ -60,11 +77,11 @@ public:
 
 			glEnableVertexAttribArray(0);
 			glEnableVertexAttribArray(1);
-			glEnableVertexAttribArray(2);
+//			glEnableVertexAttribArray(2);
 
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*) (sizeof(float)*vertexData.size()));
-			glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, (void*) (sizeof(float)*(vertexData.size()+normalData.size())));
+//			glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, (void*) (sizeof(float)*(vertexData.size()+normalData.size())));
 
 			indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
 
@@ -85,7 +102,13 @@ public:
 			glBindVertexArray(0);
 		}
 
-		void draw() const {
+		void draw(shared_ptr<shader::Program> program) const {
+//			program->uniform("matKa") = material.Ka;
+			program->uniform("matKd") = material.Kd;
+//			program->uniform("matKs") = material.Ks;
+//			program->uniform("matTr") = material.Tr;
+//			program->uniform("matKe") = material.Ke;
+//			program->uniform("matNs") = material.Ns;
 			glDrawElements(GL_TRIANGLES, size(), GL_UNSIGNED_INT, 0);
 		}
 	};
@@ -103,10 +126,10 @@ public:
 		return components.size();
 	}
 
-	void drawAll() {
+	void drawAll(shared_ptr<shader::Program> program) {
 		for (auto& c : components) {
 			c.second.bindVAO();
-			c.second.draw();
+			c.second.draw(program);
 			c.second.unbindVAO();
 		}
 	}
@@ -155,17 +178,25 @@ public:
 
 		string inputfile = fileName;
 		vector<tinyobj::shape_t> shapes;
-		printf("basename: %s\n", inputfile.substr(0, inputfile.rfind('/')).c_str());
-		string err = tinyobj::LoadObj(shapes, inputfile.c_str(), inputfile.substr(0, inputfile.rfind('/')+1).c_str());
+		string basename = inputfile.substr(0, inputfile.rfind('/')+1);
+		string err = tinyobj::LoadObj(shapes, inputfile.c_str(), basename.c_str());
 
 		if (!err.empty())
 			throw logic_error("failed to load model " + fileName);
 
 		vector<pair<string, Component>> components;
 
+		auto toVec = [](float* v) { return glm::vec4(v[0], v[1], v[2], 0.0f); };
+
 		for (auto& s : shapes) {
-			printf("mat name: %s\n", s.material.name.c_str());
-			components.emplace_back(s.name,Component(s.mesh.positions, s.mesh.normals, s.mesh.indices));
+			Material mat;
+			mat.Ka = glm::vec4(toVec(s.material.ambient));
+			mat.Kd = glm::vec4(toVec(s.material.diffuse));
+			mat.Ks = glm::vec4(toVec(s.material.specular));
+			mat.Tr = glm::vec4(toVec(s.material.transmittance));
+			mat.Ke = glm::vec4(toVec(s.material.emission));
+			mat.Ns = s.material.shininess;
+			components.emplace_back(s.name,Component(s.mesh.positions, s.mesh.normals, s.mesh.indices, mat));
 		}
 		return shared_ptr<Mesh>(new Mesh(components));
 	}
