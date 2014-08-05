@@ -155,17 +155,18 @@ public:
 
 		string inputfile = fileName;
 		vector<tinyobj::shape_t> shapes;
-
-		string err = tinyobj::LoadObj(shapes, inputfile.c_str());
+		printf("basename: %s\n", inputfile.substr(0, inputfile.rfind('/')).c_str());
+		string err = tinyobj::LoadObj(shapes, inputfile.c_str(), inputfile.substr(0, inputfile.rfind('/')+1).c_str());
 
 		if (!err.empty())
 			throw logic_error("failed to load model " + fileName);
 
 		vector<pair<string, Component>> components;
 
-		for (auto& s : shapes)
+		for (auto& s : shapes) {
+			printf("mat name: %s\n", s.material.name.c_str());
 			components.emplace_back(s.name,Component(s.mesh.positions, s.mesh.normals, s.mesh.indices));
-
+		}
 		return shared_ptr<Mesh>(new Mesh(components));
 	}
 };

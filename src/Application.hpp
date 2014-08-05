@@ -95,10 +95,7 @@ public:
 
 	virtual void onInit() {
 
-//		car = gfx::Mesh::fromObjFile("res/models/BMW/BMW_obj.obj");
-//		car = gfx::Mesh::fromObjFile("res/models/mustang/mustang.obj");
-//		car = gfx::Mesh::fromObjFile("res/models/dacia_obj/dacia.obj");
-		car = gfx::Mesh::fromObjFile("res/models/dacia_triang/dacia_triang.obj");
+		car = gfx::Mesh::fromObjFile("res/models/mustang_triang/mustang_triang.obj");
 
 
 
@@ -135,20 +132,7 @@ public:
 		case 27:
 			glutLeaveMainLoop();
 			return;
-
-//		case 'i': g_sphereCamRelPos.y -= 11.25f; break;
-//		case 'k': g_sphereCamRelPos.y += 11.25f; break;
-//		case 'j': g_sphereCamRelPos.x -= 11.25f; break;
-//		case 'l': g_sphereCamRelPos.x += 11.25f; break;
-//		case 'I': g_sphereCamRelPos.y -= 1.125f; break;
-//		case 'K': g_sphereCamRelPos.y += 1.125f; break;
-//		case 'J': g_sphereCamRelPos.x -= 1.125f; break;
-//		case 'L': g_sphereCamRelPos.x += 1.125f; break;
 		}
-
-//		g_sphereCamRelPos.y = glm::clamp(g_sphereCamRelPos.y, -78.75f, 0.0f);
-
-		glutPostRedisplay();
 	}
 
 	int x0 = 0;
@@ -210,7 +194,8 @@ public:
 		program->uniform("dirToLight") = glm::vec3(lightDirCameraSpace);
 		program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
 		program->uniform("normalModelToCameraMatrix") = glm::mat3(modelToCameraStack.top());
-		program->uniform("lightIntensity") = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		program->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+		program->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
 		for (unsigned int i=0; i<car->size(); ++i) {
 			car->at(i).bindVAO();
