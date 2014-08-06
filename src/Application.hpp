@@ -51,6 +51,7 @@ private:
 	glm::vec4 lightDirection = glm::vec4(0.866f, 0.5f, 0.0f, 0.0f);
 
 	shared_ptr<CarModel> car = nullptr;
+	shared_ptr<gfx::Mesh> plane = nullptr;
 
 private:
 
@@ -103,12 +104,13 @@ public:
 		modelToCameraStack = make_shared<gfx::MatrixStack>();
 
 		auto carMesh = gfx::Mesh::fromObjFile("res/models/mustang_triang/mustang_triang.obj");
+		plane = gfx::Mesh::fromObjFile("res/models/plane/plane.obj");
 
 		car = make_shared<CarModel>(carMesh);
 
 		auto shaders = {
-				shader::VertexShader::fromFile("res/shaders/simple.vert"),
-				shader::FragmentShader::fromFile("res/shaders/simple.frag")
+				shader::VertexShader::fromFile("res/shaders/pos-norm-passthrough.vert"),
+				shader::FragmentShader::fromFile("res/shaders/material-ads-lighting.frag")
 		};
 
 		program = make_shared<shader::Program>(shaders);
@@ -182,7 +184,7 @@ public:
 			camera.position.y -= (y-y0)/1.0f;
 			camera.position.x += (x-x0)/1.0f;
 
-			camera.position.y = glm::clamp(camera.position.y, -78.75f, 0.0f);
+//			camera.position.y = glm::clamp(camera.position.y, -78.75f, 0.0f);
 
 			x0 = x;
 			y0 = y;
@@ -213,6 +215,11 @@ public:
 		program->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
 		car->draw(program, modelToCameraStack);
+
+		modelToCameraStack->scale(10.0f, 1.0f, 10.0f);
+		program->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+		plane->drawAll(program);
+
 
 //		for (unsigned int i=0; i<car->size(); ++i) {
 //			car->at(i).second.bindVAO();

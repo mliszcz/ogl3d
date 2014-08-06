@@ -54,15 +54,16 @@ public:
 		Component(
 				const vector<float>& vertexData,
 				const vector<float>& normalData,
+				const vector<float>& textureData,
 				const vector<unsigned int>& indexData,
 				const Material& componentMaterial) {
 
 			material = componentMaterial;
 
 			vector<float> vbData;
-			std::copy(vertexData.begin(), vertexData.end(), std::back_inserter(vbData));
-			std::copy(normalData.begin(), normalData.end(), std::back_inserter(vbData));
-//			std::fill_n(std::back_inserter(vbData), 4*vertexData.size()/3, 1.0f);			// ignore material and use lit diffuse color
+			std::copy(vertexData.begin(),  vertexData.end(),  std::back_inserter(vbData));
+			std::copy(normalData.begin(),  normalData.end(),  std::back_inserter(vbData));
+			std::copy(textureData.begin(), textureData.end(), std::back_inserter(vbData));
 
 			_sizeIndex = indexData.size();
 			_sizeVertex = vertexData.size();
@@ -75,13 +76,13 @@ public:
 
 			vertexBuffer.bind(GL_ARRAY_BUFFER);
 
-			glEnableVertexAttribArray(0);
-			glEnableVertexAttribArray(1);
-//			glEnableVertexAttribArray(2);
+			if (!vertexData.empty())  glEnableVertexAttribArray(0);
+			if (!normalData.empty())  glEnableVertexAttribArray(1);
+			if (!textureData.empty()) glEnableVertexAttribArray(2);
 
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*) (sizeof(float)*vertexData.size()));
-//			glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, (void*) (sizeof(float)*(vertexData.size()+normalData.size())));
+			if (!vertexData.empty())  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+			if (!normalData.empty())  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*) (sizeof(float)*vertexData.size()));
+			if (!textureData.empty()) glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*) (sizeof(float)*(vertexData.size()+normalData.size())));
 
 			indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
 
@@ -204,7 +205,16 @@ public:
 			mat.Tr = glm::vec4(toVec(s.material.transmittance));
 			mat.Ke = glm::vec4(toVec(s.material.emission));
 			mat.Ns = s.material.shininess;
-			components.emplace_back(s.name,Component(s.mesh.positions, s.mesh.normals, s.mesh.indices, mat));
+
+			if (s.material.name.empty()) {
+				mat.Ka = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+				mat.Kd = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+				mat.Ks = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			}
+
+			components.emplace_back(s.name,Component(
+					s.mesh.positions, s.mesh.normals,
+					s.mesh.texcoords, s.mesh.indices, mat));
 		}
 		return shared_ptr<Mesh>(new Mesh(components));
 	}

@@ -49,7 +49,7 @@ public:
 			shared_ptr<gfx::MatrixStack> modelToCameraStack) {
 
 		modelToCameraStack->push();
-		modelToCameraStack->translate(0.0f, -1.0f, 0.0f);
+		modelToCameraStack->translate(0.0f, -0.25f, 0.0f);
 
 		for (const auto& sub : *mesh) {
 			const string& name = sub.first;

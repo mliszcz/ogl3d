@@ -33,7 +33,7 @@ void main()
 	phongTerm = cosAngIncidence != 0.0 ? phongTerm : 0.0;
 	phongTerm = pow(phongTerm, 128.0/matNs);
 	
-	outputColor = (matKd * lightIntensity * cosAngIncidence) +
-		(matKd * ambientIntensity) +
-		(matKs * lightIntensity * phongTerm);
+	outputColor =	(matKd * ambientIntensity)
+				+	(matKd * lightIntensity * cosAngIncidence)
+				+	(matKs * lightIntensity * phongTerm);
 }
