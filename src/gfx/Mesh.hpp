@@ -122,6 +122,14 @@ private:
 
 public:
 
+	vector<pair<string, Component>>::const_iterator begin() {
+		return components.cbegin();
+	}
+
+	vector<pair<string, Component>>::const_iterator end() {
+		return components.cend();
+	}
+
 	unsigned int size() {
 		return components.size();
 	}
@@ -134,21 +142,21 @@ public:
 		}
 	}
 
-	const Component& operator[](unsigned int index) {
+	const pair<string, Component>& operator[](unsigned int index) {
 		return at(index);
 	}
 
-	const Component& at(unsigned int index) {
-		return components.at(index).second;
+	const pair<string, Component>& at(unsigned int index) {
+		return components.at(index);
 	}
 
-	const Component& operator[](const string& name) {
+	const pair<string, Component>& operator[](const string& name) {
 		return at(name);
 	}
 
-	const Component& at(const string& name) {
-		return std::find_if(components.begin(), components.end(),
-				[&](pair<string, Component>& p){ return p.first == name; })->second;
+	const pair<string, Component>& at(const string& name) {
+		return *std::find_if(components.begin(), components.end(),
+				[&](pair<string, Component>& p){ return p.first == name; });
 	}
 
 //	static shared_ptr<Mesh> fromFile(const string& fileName) {

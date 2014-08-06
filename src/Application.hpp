@@ -28,6 +28,8 @@
 #include "gfx/MatrixStack.hpp"
 #include "gfx/Mesh.hpp"
 
+#include "CarModel.hpp"
+
 class Application : public ApplicationBase, public util::Singleton<Application> {
 	friend class util::Singleton<Application>;
 
@@ -35,9 +37,9 @@ private:
 
 	shared_ptr<shader::Program> program = nullptr;
 
-	gfx::MatrixStack modelToCameraStack;
+	shared_ptr<gfx::MatrixStack> modelToCameraStack = nullptr;
 
-	shared_ptr<gfx::Mesh> car = nullptr;
+//	shared_ptr<gfx::Mesh> car = nullptr;
 
 	gfx::Camera camera = gfx::Camera(
 			glm::vec3(90.0f, 0.0f, 10.0f),
@@ -46,6 +48,8 @@ private:
 	glm::fquat g_orientation = glm::fquat(1.0f, 0.0f, 0.0f, 0.0f);
 
 	glm::vec4 lightDirection = glm::vec4(0.866f, 0.5f, 0.0f, 0.0f);
+
+	shared_ptr<CarModel> car = nullptr;
 
 private:
 
@@ -95,9 +99,11 @@ public:
 
 	virtual void onInit() {
 
-		car = gfx::Mesh::fromObjFile("res/models/mustang_triang/mustang_triang.obj");
+		modelToCameraStack = make_shared<gfx::MatrixStack>();
 
+		auto carMesh = gfx::Mesh::fromObjFile("res/models/mustang_triang/mustang_triang.obj");
 
+		car = make_shared<CarModel>(carMesh);
 
 		auto shaders = {
 				shader::VertexShader::fromFile("res/shaders/simple.vert"),
@@ -127,12 +133,18 @@ public:
 		glViewport(0, 0, (GLsizei) width, (GLsizei) height);
 	}
 
+	float dir = 0.0f;
 	void onKeyboard(unsigned char key, int x, int y) {
 		switch (key) {
 		case 27:
 			glutLeaveMainLoop();
 			return;
+
+		case 'a': car->steerLeft(); break;
+		case 'd': car->steerRight(); break;
 		}
+
+		glutPostRedisplay();
 	}
 
 	int x0 = 0;
@@ -169,7 +181,7 @@ public:
 			camera.position.y -= (y-y0)/1.0f;
 			camera.position.x += (x-x0)/1.0f;
 
-			glm::clamp(camera.position.y, -78.75f, 0.0f);
+			camera.position.y = glm::clamp(camera.position.y, -78.75f, 0.0f);
 
 			x0 = x;
 			y0 = y;
@@ -183,25 +195,35 @@ public:
 		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		modelToCameraStack.set(camera.calculateLookAtMatrix());
-		modelToCameraStack.translate(camera.target);
-		modelToCameraStack.apply(glm::mat4_cast(g_orientation));
+		modelToCameraStack->set(camera.calculateLookAtMatrix());
+//		modelToCameraStack->translate(0.0f, -1.0f, 0.0f);
+		modelToCameraStack->translate(camera.target);
+//		modelToCameraStack.rotateY(dir);
+//		modelToCameraStack->apply(glm::mat4_cast(g_orientation));
 
 //		glm::vec4 lightDirCameraSpace = modelToCameraStack.top() * lightDirection;
 
 		program->use();
 		program->uniform("modelSpaceLightPos") = 10.0f*glm::vec3(0.5f, 1.0f, 0.5f);
 //		program->uniform("dirToLight") = glm::vec3(lightDirCameraSpace);
-		program->uniform("modelToCameraMatrix") = modelToCameraStack.top();
+		program->uniform("modelToCameraMatrix") = modelToCameraStack->top();
 //		program->uniform("normalModelToCameraMatrix") = glm::mat3(modelToCameraStack.top());
 		program->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 		program->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
-		for (unsigned int i=0; i<car->size(); ++i) {
-			car->at(i).bindVAO();
-			car->at(i).draw(program);
-			car->at(i).unbindVAO();
-		}
+		car->draw(program, modelToCameraStack);
+
+//		for (unsigned int i=0; i<car->size(); ++i) {
+//			car->at(i).second.bindVAO();
+//			car->at(i).second.draw(program);
+//			car->at(i).second.unbindVAO();
+//		}
+
+//		for (const auto& comp : *car) {
+//			comp.second.bindVAO();
+//			comp.second.drawProgram(program);
+//			comp.second.unbindVAO();
+//		}
 //		car->drawAll(program);
 
 		program->dispose();
