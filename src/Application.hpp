@@ -36,15 +36,15 @@ class Application : public ApplicationBase, public util::Singleton<Application> 
 
 private:
 
-	shared_ptr<shader::Program> program = nullptr;
-
-	shared_ptr<gfx::MatrixStack> modelToCameraStack = nullptr;
-
-//	shared_ptr<gfx::Mesh> car = nullptr;
+	shared_ptr<shader::Program> progMaterialAds = nullptr;
+	shared_ptr<shader::Program> progTextureAds = nullptr;
+	vector<shared_ptr<shader::Program>> programs;
 
 	gfx::Camera camera = gfx::Camera(
-			glm::vec3(90.0f, 0.0f, 10.0f),
+			glm::vec3(45.0f, -30.0f, 10.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f));
+
+	shared_ptr<gfx::MatrixStack> modelToCameraStack = nullptr;
 
 	glm::fquat g_orientation = glm::fquat(1.0f, 0.0f, 0.0f, 0.0f);
 
@@ -97,23 +97,66 @@ private:
 
 public:
 
+	GLuint g_textureSampler = 0;
+	GLuint g_shineTexUnit = 0;	// just some arbitrary number
+	GLuint g_shineTexture = 0;
+
 	virtual ~Application() { }
+
+	void loadTexture(string ddsFile) {
+		gli::texture2D Texture(gli::load_dds(ddsFile.c_str()));
+		assert(!Texture.empty());
+		glBindTexture(GL_TEXTURE_2D, g_shineTexture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, GLint(Texture.levels() - 1));
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ALPHA);
+		glTexStorage2D(GL_TEXTURE_2D, GLint(Texture.levels()), GLenum(gli::internal_format(Texture.format())), GLsizei(Texture.dimensions().x), GLsizei(Texture.dimensions().y));
+		if (gli::is_compressed(Texture.format())) {
+			for (gli::texture2D::size_type Level = 0; Level < Texture.levels(); ++Level) {
+				glCompressedTexSubImage2D(GL_TEXTURE_2D, GLint(Level), 0, 0, GLsizei(Texture[Level].dimensions().x), GLsizei(Texture[Level].dimensions().y), GLenum(gli::internal_format(Texture.format())), GLsizei(Texture[Level].size()), Texture[Level].data());
+			}
+		} else {
+			for (gli::texture2D::size_type Level = 0; Level < Texture.levels(); ++Level) {
+				glTexSubImage2D(GL_TEXTURE_2D, GLint(Level), 0, 0, GLsizei(Texture[Level].dimensions().x), GLsizei(Texture[Level].dimensions().y), GLenum(gli::external_format(Texture.format())), GLenum(gli::type_format(Texture.format())), Texture[Level].data());
+			}
+		}
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 
 	virtual void onInit() {
 
+		glGenSamplers(1, &g_textureSampler);
+		glSamplerParameteri(g_textureSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glSamplerParameteri(g_textureSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glSamplerParameterf(g_textureSampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
+		glSamplerParameteri(g_textureSampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glSamplerParameteri(g_textureSampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glGenTextures(1, &g_shineTexture);
+
+		loadTexture("res/models/plane/asphalt_9_512x512.dds");
+
 		modelToCameraStack = make_shared<gfx::MatrixStack>();
 
-		auto carMesh = gfx::Mesh::fromObjFile("res/models/mustang_triang/mustang_triang.obj");
+		car = make_shared<CarModel>(gfx::Mesh::fromObjFile("res/models/mustang_triang/mustang_triang.obj"));
 		plane = gfx::Mesh::fromObjFile("res/models/plane/plane.obj");
 
-		car = make_shared<CarModel>(carMesh);
+		progMaterialAds = shared_ptr<shader::Program>(new shader::Program({
+			shader::VertexShader::fromFile("res/shaders/pos-norm-passthrough.vert"),
+			shader::FragmentShader::fromFile("res/shaders/material-ads-lighting.frag")
+		}));
 
-		auto shaders = {
-				shader::VertexShader::fromFile("res/shaders/pos-norm-passthrough.vert"),
-				shader::FragmentShader::fromFile("res/shaders/material-ads-lighting.frag")
-		};
+		progTextureAds = shared_ptr<shader::Program>(new shader::Program({
+			shader::VertexShader::fromFile("res/shaders/pos-norm-tex-passthrough.vert"),
+			shader::FragmentShader::fromFile("res/shaders/texture-ads-lighting.frag")
+		}));
 
-		program = make_shared<shader::Program>(shaders);
+		programs.push_back(progMaterialAds);
+		programs.push_back(progTextureAds);
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -128,10 +171,13 @@ public:
 
 	virtual void onReshape(int width, int height) {
 
-		program->use();
-		program->uniform("cameraToClipMatrix") =
-				glm::perspectiveFov(45.0f, (float)width, (float)height, 1.0f, 100.0f);
-		program->dispose();
+		glm::mat4 projection = glm::perspectiveFov(45.0f, (float)width, (float)height, 1.0f, 100.0f);
+
+		for (auto& program : programs) {
+			program->use();
+			program->uniform("cameraToClipMatrix") = projection;
+			program->dispose();
+		}
 
 		glViewport(0, 0, (GLsizei) width, (GLsizei) height);
 	}
@@ -172,6 +218,8 @@ public:
 					camera.position.z -= 1.0f;
 				else if(button == GLUT_WHEEL_DOWN)
 					camera.position.z += 1.0f;
+
+				camera.position.z = glm::clamp(camera.position.z, 10.0f, 30.0f);
 		}
 
 		glutPostRedisplay();
@@ -184,7 +232,7 @@ public:
 			camera.position.y -= (y-y0)/1.0f;
 			camera.position.x += (x-x0)/1.0f;
 
-//			camera.position.y = glm::clamp(camera.position.y, -78.75f, 0.0f);
+			camera.position.y = glm::clamp(camera.position.y, -78.75f, -15.0f);
 
 			x0 = x;
 			y0 = y;
@@ -206,37 +254,47 @@ public:
 
 //		glm::vec4 lightDirCameraSpace = modelToCameraStack.top() * lightDirection;
 
-		program->use();
-		program->uniform("modelSpaceLightPos") = 10.0f*glm::vec3(0.5f, 1.0f, 0.5f);
+		progMaterialAds->use();
+		progMaterialAds->uniform("modelSpaceLightPos") = 10.0f*glm::vec3(0.5f, 1.0f, 0.5f);
 //		program->uniform("dirToLight") = glm::vec3(lightDirCameraSpace);
-		program->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+		progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
 //		program->uniform("normalModelToCameraMatrix") = glm::mat3(modelToCameraStack.top());
-		program->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-		program->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+		progMaterialAds->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+		progMaterialAds->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
-		car->draw(program, modelToCameraStack);
-
-		modelToCameraStack->scale(10.0f, 1.0f, 10.0f);
-		program->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-		plane->drawAll(program);
+		car->draw(progMaterialAds, modelToCameraStack);
 
 
-//		for (unsigned int i=0; i<car->size(); ++i) {
-//			car->at(i).second.bindVAO();
-//			car->at(i).second.draw(program);
-//			car->at(i).second.unbindVAO();
-//		}
+		progMaterialAds->dispose();
 
-//		for (const auto& comp : *car) {
-//			comp.second.bindVAO();
-//			comp.second.drawProgram(program);
-//			comp.second.unbindVAO();
-//		}
-//		car->drawAll(program);
 
-		program->dispose();
 
-		util::CheckError();
+		progTextureAds->use();
+
+		modelToCameraStack->scale(1000.0f, 1.0f, 1000.0f);
+		progTextureAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+
+		progTextureAds->uniform("modelSpaceLightPos") = 10.0f*glm::vec3(0.5f, 1.0f, 0.5f);
+		//		program->uniform("dirToLight") = glm::vec3(lightDirCameraSpace);
+		progTextureAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+		//		program->uniform("normalModelToCameraMatrix") = glm::mat3(modelToCameraStack.top());
+		progTextureAds->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+		progTextureAds->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+
+		glActiveTexture(GL_TEXTURE0 + g_shineTexUnit);
+		glBindTexture(GL_TEXTURE_2D, g_shineTexture);
+		glBindSampler(g_shineTexUnit, g_textureSampler);
+
+		plane->drawAll(progMaterialAds);
+
+		glBindSampler(g_shineTexUnit, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		progTextureAds->dispose();
+
+
+
+//		util::CheckError();
 
 		glutSwapBuffers();
 
