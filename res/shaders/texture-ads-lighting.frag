@@ -5,7 +5,7 @@ in vec2 textureCoord;
 in vec3 modelSpacePosition;
 in vec3 cameraSpacePosition;
 
-out vec4 outputColor;
+//out vec4 outputColor;
 
 uniform vec3 modelSpaceLightPos;
 
@@ -34,7 +34,21 @@ void main()
 	vec4 baseColor = texture(textureSampler, textureCoord);
 	vec4 white = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	
-	outputColor =	(baseColor * ambientIntensity)
+	const float LOG2 = 1.442695;
+float z = gl_FragCoord.z / gl_FragCoord.w;
+float dens = 0.1f;
+vec4 fogCol = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+float fogFactor = exp2( -dens * 
+				   dens * 
+				   z * 
+				   z * 
+				   LOG2 );
+fogFactor = clamp(fogFactor, 0.0, 1.0);
+	
+	vec4 outputColor =	(baseColor * ambientIntensity)
 				+	(baseColor * lightIntensity * cosAngIncidence)
 				+	(white * lightIntensity * phongTerm);
+				
+				gl_FragColor = mix(fogCol, outputColor, fogFactor);
+				
 }

@@ -4,7 +4,7 @@ in vec3 vertexNormal;
 in vec3 modelSpacePosition;
 in vec3 cameraSpacePosition;
 
-out vec4 outputColor;
+//out vec4 outputColor;
 
 uniform vec3 modelSpaceLightPos;
 
@@ -33,7 +33,20 @@ void main()
 	phongTerm = cosAngIncidence != 0.0 ? phongTerm : 0.0;
 	phongTerm = pow(phongTerm, 128.0/matNs);
 	
-	outputColor =	(matKd * ambientIntensity)
+		const float LOG2 = 1.442695;
+float z = gl_FragCoord.z / gl_FragCoord.w;
+float dens = 0.1f;
+vec4 fogCol = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+float fogFactor = exp2( -dens * 
+				   dens * 
+				   z * 
+				   z * 
+				   LOG2 );
+fogFactor = clamp(fogFactor, 0.0, 1.0);
+	
+	vec4 outputColor =	(matKd * ambientIntensity)
 				+	(matKd * lightIntensity * cosAngIncidence)
 				+	(matKs * lightIntensity * phongTerm);
+				
+	gl_FragColor = mix(fogCol, outputColor, fogFactor);
 }
