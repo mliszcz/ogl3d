@@ -23,6 +23,7 @@
 #include "gfx/GenericBuffer.hpp"
 
 #include "glm/glm.hpp"
+#include "gli/gli.hpp"
 
 #include "gfx/Camera.hpp"
 #include "gfx/MatrixStack.hpp"
