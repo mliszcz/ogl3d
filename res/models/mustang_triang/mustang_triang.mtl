@@ -117,7 +117,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\BOTTOM.TGA
 
 newmtl Bottom2_BOTTOM.TGA
 Ns 92.156863
@@ -127,7 +126,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\BOTTOM.TGA
 
 newmtl Bottom_BOTTOM.TGA
 Ns 92.156863
@@ -137,7 +135,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\BOTTOM.TGA
 
 newmtl Brake_Disc1_BRAKDISC.TGA
 Ns 92.156863
@@ -147,8 +144,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\BRAKDISC.TGA
-map_d C:\\\\Documents and Settings\\\\Ward Family\\\\My Documents\\\\My Pictures\\\\car templates\\\\blender images\\\\Slum Run\\\\TIREBACK.TGA
 
 newmtl Brake_Disc2_BRAKDISC.TGA
 Ns 92.156863
@@ -158,8 +153,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\BRAKDISC.TGA
-map_d C:\\\\Documents and Settings\\\\Ward Family\\\\My Documents\\\\My Pictures\\\\car templates\\\\blender images\\\\Slum Run\\\\TIREBACK.TGA
 
 newmtl Brake_Disc3_BRAKDISC.TGA
 Ns 92.156863
@@ -169,8 +162,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\BRAKDISC.TGA
-map_d C:\\\\Documents and Settings\\\\Ward Family\\\\My Documents\\\\My Pictures\\\\car templates\\\\blender images\\\\Slum Run\\\\TIREBACK.TGA
 
 newmtl Brake_Disc4_BRAKDISC.TGA
 Ns 92.156863
@@ -180,8 +171,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\BRAKDISC.TGA
-map_d C:\\\\Documents and Settings\\\\Ward Family\\\\My Documents\\\\My Pictures\\\\car templates\\\\blender images\\\\Slum Run\\\\TIREBACK.TGA
 
 newmtl Brake_Disc_BRAKDISC.TGA
 Ns 92.156863
@@ -191,8 +180,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\BRAKDISC.TGA
-map_d C:\\\\Documents and Settings\\\\Ward Family\\\\My Documents\\\\My Pictures\\\\car templates\\\\blender images\\\\Slum Run\\\\TIREBACK.TGA
 
 newmtl Brake_Pads
 Ns 92.156863
@@ -229,8 +216,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\DOORLINE.TGA
-map_d C:\\\\Documents and Settings\\\\Ward Family\\\\My Documents\\\\My Pictures\\\\car templates\\\\blender images\\\\Slum Run\\\\DOORLINE.TGA
 
 newmtl DoorLine2_DOORLINE.TGA
 Ns 92.156863
@@ -240,8 +225,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\DOORLINE.TGA
-map_d C:\\\\Documents and Settings\\\\Ward Family\\\\My Documents\\\\My Pictures\\\\car templates\\\\blender images\\\\Slum Run\\\\DOORLINE.TGA
 
 newmtl DoorLine3_DOORLINE.TGA
 Ns 92.156863
@@ -251,8 +234,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\DOORLINE.TGA
-map_d C:\\\\Documents and Settings\\\\Ward Family\\\\My Documents\\\\My Pictures\\\\car templates\\\\blender images\\\\Slum Run\\\\DOORLINE.TGA
 
 newmtl DoorLine_DOORLINE.TGA
 Ns 92.156863
@@ -262,8 +243,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\DOORLINE.TGA
-map_d C:\\\\Documents and Settings\\\\Ward Family\\\\My Documents\\\\My Pictures\\\\car templates\\\\blender images\\\\Slum Run\\\\DOORLINE.TGA
 
 newmtl Interior
 Ns 92.156863
@@ -282,7 +261,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\LICENSE.TGA
 
 newmtl Mat
 Ns 92.156863
@@ -373,7 +351,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\WDEFROST.TGA
 
 newmtl Misc
 Ns 92.156863
@@ -527,7 +504,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_d C:\\\\Documents and Settings\\\\Ward Family\\\\My Documents\\\\My Pictures\\\\car templates\\\\blender images\\\\Slum Run\\\\TIREBACK.TGA
 
 newmtl Tire_TIRE.TGA
 Ns 92.156863
@@ -537,7 +513,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd C:\\Documents and Settings\\Ward Family\\My Documents\\My Pictures\\car templates\\blender images\\Slum Run\\TIRE.TGA
 
 newmtl headlight_glass
 Ns 92.156863

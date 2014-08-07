@@ -275,7 +275,7 @@ public:
 		modelToCameraStack->scale(20.0f, 20.f, 20.f);
 		progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
 
-		skybox->drawAll(progMaterialAds);
+		skybox->drawAll();
 		modelToCameraStack->pop();
 
 		progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
@@ -302,33 +302,10 @@ public:
 		GLuint gaussianTextureUnif = glGetUniformLocation(progTextureAds->handle(), "textureSampler");
 		glUniform1i(gaussianTextureUnif, g_shineTexUnit);
 
-		printf("set sampler\n");
-		util::CheckError();
 
-		glActiveTexture(GL_TEXTURE0 + g_shineTexUnit);
-
-		printf("active tex\n");
-		util::CheckError();
-
-		glBindTexture(GL_TEXTURE_2D, g_shineTexture);
-
-		printf("bind tex\n");
-		util::CheckError();
-
-
-		glBindSampler(g_shineTexUnit, g_textureSampler);
-
-		printf("bind sampler\n");
-		util::CheckError();
-
-//		texx->bind();
-
-		plane->drawAll(progMaterialAds);
-
-//		texx->unbind();
-
-		glBindSampler(g_shineTexUnit, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		plane->at(0).second.material()->mapKd->bind();
+		plane->drawAll();
+		plane->at(0).second.material()->mapKd->unbind();
 
 		progTextureAds->dispose();
 

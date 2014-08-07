@@ -15,6 +15,8 @@
 
 #include "../Common.hpp"
 #include "GenericBuffer.hpp"
+#include "Material.hpp"
+#include "Texture.hpp"
 
 #include "glm/glm.hpp"
 #include "tinyobjloader/tiny_obj_loader.hpp"
@@ -24,17 +26,6 @@ namespace gfx {
 class Mesh {
 
 public:
-
-	class Material {
-
-	public:
-		glm::vec4 	Ka;		// ambient
-		glm::vec4 	Kd;		// diffuse
-		glm::vec4 	Ks;		// specular
-		glm::vec4 	Tr;		// transmitance
-		glm::vec4 	Ke;		// emission
-		float 		Ns;		// shininess (specular exponent), 0-1000
-	};
 
 	class Component {
 		friend class Mesh;
@@ -46,7 +37,7 @@ public:
 
 		GLuint vertexArrayObject;
 
-		Material material;
+		shared_ptr<Material> objMaterial;
 
 		unsigned int _sizeIndex = 0;
 		unsigned int _sizeVertex = 0;
@@ -56,9 +47,9 @@ public:
 				const vector<float>& normalData,
 				const vector<float>& textureData,
 				const vector<unsigned int>& indexData,
-				const Material& componentMaterial) {
+				shared_ptr<Material> componentMaterial) {
 
-			material = componentMaterial;
+			objMaterial = componentMaterial;
 
 			vector<float> vbData;
 			std::copy(vertexData.begin(),  vertexData.end(),  std::back_inserter(vbData));
@@ -95,6 +86,10 @@ public:
 			return _sizeIndex;
 		}
 
+		shared_ptr<Material> material() const {
+			return objMaterial;
+		}
+
 		void bindVAO() const {
 			glBindVertexArray(vertexArrayObject);
 		}
@@ -103,13 +98,7 @@ public:
 			glBindVertexArray(0);
 		}
 
-		void draw(shared_ptr<shader::Program> program) const {
-//			program->uniform("matKa") = material.Ka;
-			program->uniform("matKd") = material.Kd;
-			program->uniform("matKs") = material.Ks;
-//			program->uniform("matTr") = material.Tr;
-//			program->uniform("matKe") = material.Ke;
-			program->uniform("matNs") = material.Ns;
+		void draw() const {
 			glDrawElements(GL_TRIANGLES, size(), GL_UNSIGNED_INT, 0);
 		}
 	};
@@ -135,10 +124,10 @@ public:
 		return components.size();
 	}
 
-	void drawAll(shared_ptr<shader::Program> program) {
+	void drawAll() {
 		for (auto& c : components) {
 			c.second.bindVAO();
-			c.second.draw(program);
+			c.second.draw();
 			c.second.unbindVAO();
 		}
 	}
@@ -160,29 +149,6 @@ public:
 				[&](pair<string, Component>& p){ return p.first == name; });
 	}
 
-//	static shared_ptr<Mesh> fromFile(const string& fileName) {
-//
-//		std::ifstream file(fileName);
-//
-//		unsigned int numVertices = 0;
-//		unsigned int numIndices = 0;
-//
-//		file >> numVertices >> numIndices;
-//
-//		vector<float> vertexData;
-//		vector<unsigned int> indexData;
-//
-//		std::copy_n(std::istream_iterator<float>(file), 3*numVertices + 4*numVertices,
-//				std::back_inserter(vertexData));
-//
-//		std::copy_n(std::istream_iterator<unsigned int>(file), 3*numIndices,
-//				std::back_inserter(indexData));
-//
-//		return shared_ptr<Mesh>(new Mesh({
-//			{"mesh", Component(vertexData, vector<float>(), indexData)}
-//		}));
-//	}
-
 	static shared_ptr<Mesh> fromObjFile(const string& fileName) {
 
 		string inputfile = fileName;
@@ -195,22 +161,35 @@ public:
 
 		vector<pair<string, Component>> components;
 
-		auto toVec = [](float* v) { return glm::vec4(v[0], v[1], v[2], 0.0f); };
+		float eps = 0.0000f;
+		auto toVecPtr = [=](float* v) {
+			return (fabs(v[0])>eps || fabs(v[1])>eps || fabs(v[2])>eps)
+					? make_shared<glm::vec4>(v[0], v[1], v[2], 1.0f)
+					: nullptr;
+		};
+		auto toFloatPtr = [=](float v) {
+			return (fabs(v)>eps) ? make_shared<float>(v) : nullptr;
+		};
+		auto toTexPtr = [=](string fileName) {
+			return (fileName.empty()) ? nullptr
+					: Texture::fromDdsFile(fileName);
+		};
 
 		for (auto& s : shapes) {
-			Material mat;
-			mat.Ka = glm::vec4(toVec(s.material.ambient));
-			mat.Kd = glm::vec4(toVec(s.material.diffuse));
-			mat.Ks = glm::vec4(toVec(s.material.specular));
-			mat.Tr = glm::vec4(toVec(s.material.transmittance));
-			mat.Ke = glm::vec4(toVec(s.material.emission));
-			mat.Ns = s.material.shininess;
 
-			if (s.material.name.empty()) {
-				mat.Ka = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-				mat.Kd = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-				mat.Ks = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-			}
+			auto mat = make_shared<Material>();
+			mat->Ka = toVecPtr(s.material.ambient);
+			mat->Kd = toVecPtr(s.material.diffuse);
+			mat->Ks = toVecPtr(s.material.specular);
+			mat->Tr = toVecPtr(s.material.transmittance);
+			mat->Ke = toVecPtr(s.material.emission);
+			mat->Ns = toFloatPtr(s.material.shininess);
+			mat->d = toFloatPtr(s.material.dissolve);
+			mat->Ni = toFloatPtr(s.material.ior);
+
+			mat->mapKa = toTexPtr(s.material.ambient_texname);
+			mat->mapKd = toTexPtr(s.material.diffuse_texname);
+			mat->mapKs = toTexPtr(s.material.specular_texname);
 
 			components.emplace_back(s.name,Component(
 					s.mesh.positions, s.mesh.normals,

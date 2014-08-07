@@ -75,7 +75,14 @@ public:
 
 			program->uniform("modelToCameraMatrix") = modelToCameraStack->top();
 
-			comp.draw(program);
+			auto mat = comp.material();
+			if (mat->Kd != nullptr) program->uniform("matKd") = *(mat->Kd);
+			if (mat->Ks != nullptr) program->uniform("matKs") = *(mat->Ks);
+			if (mat->Ns != nullptr) program->uniform("matNs") = *(mat->Ns);
+
+			program->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+
+			comp.draw();
 
 			modelToCameraStack->pop();
 
