@@ -90,11 +90,11 @@ public:
 			return objMaterial;
 		}
 
-		void bindVAO() const {
+		void bind() const {
 			glBindVertexArray(vertexArrayObject);
 		}
 
-		void unbindVAO() const {
+		void unbind() const {
 			glBindVertexArray(0);
 		}
 
@@ -126,9 +126,8 @@ public:
 
 	void drawAll() {
 		for (auto& c : components) {
-			c.second.bindVAO();
+			with component(&c.second);
 			c.second.draw();
-			c.second.unbindVAO();
 		}
 	}
 

@@ -17,7 +17,7 @@
 
 namespace gfx {
 
-class Texture : public GLObject {
+class Texture : public GLObject, public ContexObject {
 
 private:
 

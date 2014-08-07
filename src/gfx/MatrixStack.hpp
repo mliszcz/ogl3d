@@ -44,6 +44,16 @@ public:
 		matrices.pop();
 	}
 
+	// used by 'with'
+	void bind() {
+		push();
+	}
+
+	// used by 'with'
+	void unbind() {
+		pop();
+	}
+
 	void translate(const glm::vec3& v) {
 		current = glm::translate(current, v);
 	}

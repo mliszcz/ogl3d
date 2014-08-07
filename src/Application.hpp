@@ -101,37 +101,9 @@ private:
 
 public:
 
-	GLuint g_textureSampler = 0;
-	GLuint g_shineTexUnit = 0;	// just some arbitrary number
-	GLuint g_shineTexture = 0;
-
 	virtual ~Application() { }
 
-	void loadTexture(string ddsFile) {
-		gli::texture2D Texture(gli::load_dds(ddsFile.c_str()));
-		assert(!Texture.empty());
-		glBindTexture(GL_TEXTURE_2D, g_shineTexture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, GLint(Texture.levels() - 1));
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ALPHA);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
-		glTexStorage2D(GL_TEXTURE_2D, GLint(Texture.levels()), GLenum(gli::internal_format(Texture.format())), GLsizei(Texture.dimensions().x), GLsizei(Texture.dimensions().y));
-		if (!gli::is_compressed(Texture.format())) {
-			for (gli::texture2D::size_type Level = 0; Level < Texture.levels(); ++Level) {
-				gli::image tex = Texture[Level];
-				glTexSubImage2D(GL_TEXTURE_2D, GLint(Level), 0, 0,
-						GLsizei(Texture[Level].dimensions().x),
-						GLsizei(Texture[Level].dimensions().y),
-						GLenum(gli::external_format(Texture.format())),
-						GLenum(gli::type_format(Texture.format())),
-						Texture[Level].data());
-			}
-		}
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
+	GLuint g_textureSampler = 0;
 
 	virtual void onInit() {
 
@@ -141,12 +113,6 @@ public:
 		glSamplerParameterf(g_textureSampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
 		glSamplerParameteri(g_textureSampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glSamplerParameteri(g_textureSampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-//		texx = gfx::Texture::fromDdsFile("res/models/plane/asphalt_9_512x512.dds");
-
-		glGenTextures(1, &g_shineTexture);
-
-		loadTexture("res/models/plane/asphalt_9_512x512.dds");
 
 		modelToCameraStack = make_shared<gfx::MatrixStack>();
 
@@ -256,60 +222,42 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		modelToCameraStack->set(camera.calculateLookAtMatrix());
-//		modelToCameraStack->translate(0.0f, -1.0f, 0.0f);
 		modelToCameraStack->translate(camera.target);
-//		modelToCameraStack.rotateY(dir);
 //		modelToCameraStack->apply(glm::mat4_cast(g_orientation));
 
-//		glm::vec4 lightDirCameraSpace = modelToCameraStack.top() * lightDirection;
+		{ with program(progMaterialAds);
 
-		progMaterialAds->use();
-		progMaterialAds->uniform("modelSpaceLightPos") = 10.0f*glm::vec3(0.5f, 1.0f, 0.5f);
-//		program->uniform("dirToLight") = glm::vec3(lightDirCameraSpace);
-		progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-//		program->uniform("normalModelToCameraMatrix") = glm::mat3(modelToCameraStack.top());
-		progMaterialAds->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-		progMaterialAds->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+			progMaterialAds->uniform("modelSpaceLightPos") = 10.0f*glm::vec3(0.5f, 1.0f, 0.5f);
+			progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+			progMaterialAds->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+			progMaterialAds->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
-		modelToCameraStack->push();
-		modelToCameraStack->scale(20.0f, 20.f, 20.f);
-		progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+			{ with matrixStack(modelToCameraStack);
 
-		skybox->drawAll();
-		modelToCameraStack->pop();
+				modelToCameraStack->scale(20.0f, 20.f, 20.f);
+				progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
 
-		progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+				skybox->drawAll();
+			}
 
-		car->draw(progMaterialAds, modelToCameraStack);
+			progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+			car->draw(progMaterialAds, modelToCameraStack);
+		}
 
 
-		progMaterialAds->dispose();
+		{ with program(progTextureAds);
 
+			modelToCameraStack->scale(1000.0f, 1.0f, 1000.0f);
+			progTextureAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+			progTextureAds->uniform("modelSpaceLightPos") = 10.0f*glm::vec3(0.5f, 1.0f, 0.5f);
+			progTextureAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+			progTextureAds->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+			progTextureAds->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
-
-		progTextureAds->use();
-
-		modelToCameraStack->scale(1000.0f, 1.0f, 1000.0f);
-		progTextureAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-
-		progTextureAds->uniform("modelSpaceLightPos") = 10.0f*glm::vec3(0.5f, 1.0f, 0.5f);
-		//		program->uniform("dirToLight") = glm::vec3(lightDirCameraSpace);
-		progTextureAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-		//		program->uniform("normalModelToCameraMatrix") = glm::mat3(modelToCameraStack.top());
-		progTextureAds->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-		progTextureAds->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
-
-		GLuint gaussianTextureUnif = glGetUniformLocation(progTextureAds->handle(), "textureSampler");
-		glUniform1i(gaussianTextureUnif, g_shineTexUnit);
-
-
-		plane->at(0).second.material()->mapKd->bind();
-		plane->drawAll();
-		plane->at(0).second.material()->mapKd->unbind();
-
-		progTextureAds->dispose();
-
-
+			{ with texture(plane->at(0).second.material()->mapKd);
+				plane->drawAll();
+			}
+		}
 
 		util::CheckError();
 

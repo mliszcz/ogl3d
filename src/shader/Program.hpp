@@ -57,6 +57,14 @@ public:
 		glUseProgram(0);
 	}
 
+	void bind() {
+		glUseProgram(_handle);
+	}
+
+	void unbind() {
+		glUseProgram(0);
+	}
+
 private:
 
 	GLint getProgramiv(GLuint program, GLenum pname) {

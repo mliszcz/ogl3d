@@ -15,6 +15,7 @@
 #define GLM_FORCE_RADIANS
 
 #include <initializer_list>
+#include <functional>
 #include <stdexcept>
 #include <algorithm>
 #include <iterator>
@@ -34,6 +35,7 @@ using std::pair;
 using std::stack;
 using std::list;
 using std::map;
+using std::function;
 using std::initializer_list;
 
 using std::logic_error;
