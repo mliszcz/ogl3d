@@ -28,6 +28,7 @@
 #include "gfx/Camera.hpp"
 #include "gfx/MatrixStack.hpp"
 #include "gfx/Mesh.hpp"
+#include "gfx/Texture.hpp"
 
 #include "CarModel.hpp"
 
@@ -53,6 +54,8 @@ private:
 	shared_ptr<CarModel> car = nullptr;
 	shared_ptr<gfx::Mesh> plane = nullptr;
 	shared_ptr<gfx::Mesh> skybox = nullptr;
+
+	shared_ptr<gfx::Texture> texx = nullptr;
 
 private:
 
@@ -110,18 +113,20 @@ public:
 		glBindTexture(GL_TEXTURE_2D, g_shineTexture);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, GLint(Texture.levels() - 1));
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ALPHA);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ALPHA);
 		glTexStorage2D(GL_TEXTURE_2D, GLint(Texture.levels()), GLenum(gli::internal_format(Texture.format())), GLsizei(Texture.dimensions().x), GLsizei(Texture.dimensions().y));
-		if (gli::is_compressed(Texture.format())) {
+		if (!gli::is_compressed(Texture.format())) {
 			for (gli::texture2D::size_type Level = 0; Level < Texture.levels(); ++Level) {
-				glCompressedTexSubImage2D(GL_TEXTURE_2D, GLint(Level), 0, 0, GLsizei(Texture[Level].dimensions().x), GLsizei(Texture[Level].dimensions().y), GLenum(gli::internal_format(Texture.format())), GLsizei(Texture[Level].size()), Texture[Level].data());
-			}
-		} else {
-			for (gli::texture2D::size_type Level = 0; Level < Texture.levels(); ++Level) {
-				glTexSubImage2D(GL_TEXTURE_2D, GLint(Level), 0, 0, GLsizei(Texture[Level].dimensions().x), GLsizei(Texture[Level].dimensions().y), GLenum(gli::external_format(Texture.format())), GLenum(gli::type_format(Texture.format())), Texture[Level].data());
+				gli::image tex = Texture[Level];
+				glTexSubImage2D(GL_TEXTURE_2D, GLint(Level), 0, 0,
+						GLsizei(Texture[Level].dimensions().x),
+						GLsizei(Texture[Level].dimensions().y),
+						GLenum(gli::external_format(Texture.format())),
+						GLenum(gli::type_format(Texture.format())),
+						Texture[Level].data());
 			}
 		}
 
@@ -136,6 +141,8 @@ public:
 		glSamplerParameterf(g_textureSampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
 		glSamplerParameteri(g_textureSampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glSamplerParameteri(g_textureSampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+//		texx = gfx::Texture::fromDdsFile("res/models/plane/asphalt_9_512x512.dds");
 
 		glGenTextures(1, &g_shineTexture);
 
@@ -292,11 +299,33 @@ public:
 		progTextureAds->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 		progTextureAds->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
+		GLuint gaussianTextureUnif = glGetUniformLocation(progTextureAds->handle(), "textureSampler");
+		glUniform1i(gaussianTextureUnif, g_shineTexUnit);
+
+		printf("set sampler\n");
+		util::CheckError();
+
 		glActiveTexture(GL_TEXTURE0 + g_shineTexUnit);
+
+		printf("active tex\n");
+		util::CheckError();
+
 		glBindTexture(GL_TEXTURE_2D, g_shineTexture);
+
+		printf("bind tex\n");
+		util::CheckError();
+
+
 		glBindSampler(g_shineTexUnit, g_textureSampler);
 
+		printf("bind sampler\n");
+		util::CheckError();
+
+//		texx->bind();
+
 		plane->drawAll(progMaterialAds);
+
+//		texx->unbind();
 
 		glBindSampler(g_shineTexUnit, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -305,7 +334,7 @@ public:
 
 
 
-//		util::CheckError();
+		util::CheckError();
 
 		glutSwapBuffers();
 
