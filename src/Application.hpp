@@ -52,6 +52,7 @@ private:
 
 	shared_ptr<CarModel> car = nullptr;
 	shared_ptr<gfx::Mesh> plane = nullptr;
+	shared_ptr<gfx::Mesh> skybox = nullptr;
 
 private:
 
@@ -144,6 +145,7 @@ public:
 
 		car = make_shared<CarModel>(gfx::Mesh::fromObjFile("res/models/mustang_triang/mustang_triang.obj"));
 		plane = gfx::Mesh::fromObjFile("res/models/plane/plane.obj");
+		skybox = gfx::Mesh::fromObjFile("res/models/skybox/skybox.obj");
 
 		progMaterialAds = shared_ptr<shader::Program>(new shader::Program({
 			shader::VertexShader::fromFile("res/shaders/pos-norm-passthrough.vert"),
@@ -219,7 +221,7 @@ public:
 				else if(button == GLUT_WHEEL_DOWN)
 					camera.position.z += 1.0f;
 
-				camera.position.z = glm::clamp(camera.position.z, 10.0f, 30.0f);
+				camera.position.z = glm::clamp(camera.position.z, 10.0f, 50.0f);
 		}
 
 		glutPostRedisplay();
@@ -232,7 +234,7 @@ public:
 			camera.position.y -= (y-y0)/1.0f;
 			camera.position.x += (x-x0)/1.0f;
 
-			camera.position.y = glm::clamp(camera.position.y, -78.75f, -15.0f);
+//			camera.position.y = glm::clamp(camera.position.y, -78.75f, -15.0f);
 
 			x0 = x;
 			y0 = y;
@@ -261,6 +263,15 @@ public:
 //		program->uniform("normalModelToCameraMatrix") = glm::mat3(modelToCameraStack.top());
 		progMaterialAds->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 		progMaterialAds->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+
+		modelToCameraStack->push();
+		modelToCameraStack->scale(20.0f, 20.f, 20.f);
+		progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+
+		skybox->drawAll(progMaterialAds);
+		modelToCameraStack->pop();
+
+		progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
 
 		car->draw(progMaterialAds, modelToCameraStack);
 

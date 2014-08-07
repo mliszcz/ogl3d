@@ -36,8 +36,8 @@ void main()
 	
 	const float LOG2 = 1.442695;
 float z = gl_FragCoord.z / gl_FragCoord.w;
-float dens = 0.1f;
-vec4 fogCol = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+float dens = 0.01f;
+vec4 fogCol = 0.5*vec4(1.0f, 1.0f, 1.0f, 2.0f);
 float fogFactor = exp2( -dens * 
 				   dens * 
 				   z * 

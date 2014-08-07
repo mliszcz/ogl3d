@@ -33,7 +33,7 @@ public:
 		glm::vec4 	Ks;		// specular
 		glm::vec4 	Tr;		// transmitance
 		glm::vec4 	Ke;		// emission
-		float 		Ns;		// shininess
+		float 		Ns;		// shininess (specular exponent), 0-1000
 	};
 
 	class Component {
