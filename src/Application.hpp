@@ -14,6 +14,7 @@
 #include "util/Singleton.hpp"
 #include "util/Config.hpp"
 #include "util/Logger.hpp"
+#include "util/HighResolutionClock.hpp"
 
 #include "shader/Shader.hpp"
 #include "shader/VertexShader.hpp"
@@ -40,6 +41,8 @@ private:
 	shared_ptr<shader::Program> progMaterialAds = nullptr;
 	shared_ptr<shader::Program> progTextureAds = nullptr;
 	vector<shared_ptr<shader::Program>> programs;
+
+	util::HighResolutionClock hiResColck;
 
 	gfx::Camera camera = gfx::Camera(
 			glm::vec3(45.0f, -30.0f, 10.0f),
@@ -220,6 +223,9 @@ public:
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		float frameTime = hiResColck.delta();
+		printf("frame time %f\n", frameTime);
 
 		modelToCameraStack->set(camera.calculateLookAtMatrix());
 		modelToCameraStack->translate(camera.target);
