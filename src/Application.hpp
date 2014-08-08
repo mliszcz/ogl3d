@@ -160,17 +160,28 @@ public:
 		glViewport(0, 0, (GLsizei) width, (GLsizei) height);
 	}
 
-	float dir = 0.0f;
-	void onKeyboard(unsigned char key, int x, int y) {
+	void onKeyDown(unsigned char key, int x, int y) {
 		switch (key) {
 		case 27:
 			glutLeaveMainLoop();
 			return;
 
-		case 'a': car->steerLeft(); break;
-		case 'd': car->steerRight(); break;
+		case 'w': car->accelerate(true); break;
+		case 's': car->decelerate(true); break;
+		case 'a': car->steerLeft(true); break;
+		case 'd': car->steerRight(true); break;
 		}
 
+		glutPostRedisplay();
+	}
+
+	void onKeyUp(unsigned char key, int x, int y) {
+		switch (key) {
+		case 'w': car->accelerate(false); break;
+		case 's': car->decelerate(false); break;
+		case 'a': car->steerLeft(false); break;
+		case 'd': car->steerRight(false); break;
+		}
 		glutPostRedisplay();
 	}
 
@@ -225,7 +236,7 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		float frameTime = hiResColck.delta();
-		printf("frame time %f\n", frameTime);
+		car->recalc(frameTime);
 
 		modelToCameraStack->set(camera.calculateLookAtMatrix());
 		modelToCameraStack->translate(camera.target);
@@ -269,9 +280,11 @@ public:
 
 		glutSwapBuffers();
 
-		static bool once = true;
-		if(once) glutPostRedisplay();
-		once = false;
+		glutPostRedisplay();
+
+//		static bool once = true;
+//		if(once) glutPostRedisplay();
+//		once = false;
 	}
 
 };

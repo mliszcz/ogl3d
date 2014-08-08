@@ -27,29 +27,121 @@ private:
 	glm::fquat carOrientation = glm::fquat(1.0, 0.0, 0.0, 0.0);
 	glm::fquat wheelOrientation = glm::fquat(1.0, 0.0, 0.0, 0.0);
 
+	float carAngle = 0.0f;
+
+	const float wheelRotSpeed = 40.0f;	// deg/s
+	const float wheelMaxAngle = 20.0f;	// deg
 	float wheelAngle = 0.0f;
+
+	glm::vec3 vecPosition = glm::vec3(0.0f,-0.25f, 0.0f); // model does not 'stand' on the ground (Y=0)
+	glm::vec3 vecVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 vecAccelert = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	bool accelerating = false;
+	bool decelerating = false;
+//	float accelerationFactor = 0.0f;	// no unit, [-1, 1]
+
+	float speedMax = 2.0f;	// u/s
+
+	bool steeringLeft = false;
+	bool steeringRight = false;
+
 	const glm::vec3 wheelPosFL = glm::vec3(-2.5f, 0.0f, +1.5f);
 	const glm::vec3 wheelPosFR = glm::vec3(-2.5f, 0.0f, -1.5f);
+	float wheelBase = 5.0f;
 
 public:
 
 	CarModel(shared_ptr<gfx::Mesh> carMesh)
 		: mesh(carMesh) { }
 
-	void steerLeft() {
-		wheelAngle += 10.0f;
-		wheelAngle = glm::clamp(wheelAngle, -30.0f, 30.0f);
-
-		wheelOrientation = carOrientation
-				* OrientationQuat(glm::vec3(0.0f, 1.0f, 0.0f), wheelAngle);
+	void steerLeft(bool steer) {
+		steeringLeft = steer;
+		steeringRight = steeringRight && !steeringLeft;
 	}
 
-	void steerRight() {
-		wheelAngle -= 10.0f;
-		wheelAngle = glm::clamp(wheelAngle, -30.0f, 30.0f);
+	void steerRight(bool steer) {
+		steeringRight = steer;
+		steeringLeft = steeringLeft && !steeringRight;
+	}
 
-		wheelOrientation = carOrientation
-						* OrientationQuat(glm::vec3(0.0f, 1.0f, 0.0f), wheelAngle);
+	void accelerate(bool accel) {
+		accelerating = accel;
+		decelerating = decelerating && !accelerating;
+	}
+
+	void decelerate(bool decel) {
+		decelerating = decel;
+		accelerating = accelerating && !decelerating;
+	}
+
+	void recalc(float dt) {
+
+		float da = dt * wheelRotSpeed;
+
+		if (steeringLeft) wheelAngle += da;
+		else if (steeringRight) wheelAngle -= da;
+		else if(fabs(wheelAngle) > da)
+			wheelAngle -= wheelAngle/fabs(wheelAngle) * da;
+
+		wheelAngle = glm::clamp(wheelAngle, -wheelMaxAngle, wheelMaxAngle);
+
+		wheelOrientation = OrientationQuat(glm::vec3(0.0f, 1.0f, 0.0f), wheelAngle);
+
+		float wheelAngleRad = util::DegToRad(wheelAngle);
+
+//		if (accelerating) vecAccelert = glm::vec3(cosf(-wheenAngleRad), 0.0f, sinf(-wheenAngleRad));
+//		else if (decelerating) vecAccelert = -1.0f*glm::vec3(cosf(+wheenAngleRad), 0.0f, sinf(+wheenAngleRad));
+//		else {
+//			vecAccelert -= 0.5f * vecVelocity; //glm::length(vecVelocity) * glm::vec3(cosf(-wheenAngleRad), 0.0f, sinf(-wheenAngleRad));
+//		}
+
+		if (accelerating) speedMax = +1.0f;
+		else if (decelerating) speedMax = -1.0f;
+		else {
+			speedMax = 0.0f;
+		}
+
+		speedMax *= 10.0f;
+
+		float carAngleRad = util::DegToRad(-carAngle);
+
+		glm::vec2 pos = glm::vec2(vecPosition.x, vecPosition.z);
+		glm::vec2 frontWheel = pos + wheelBase/2 * glm::vec2( cosf(carAngleRad), -sinf(carAngleRad) );
+		glm::vec2 backWheel = pos - wheelBase/2 * glm::vec2( cosf(carAngleRad), -sinf(carAngleRad) );
+
+		backWheel += speedMax * dt * glm::vec2(cosf(carAngleRad) , -sinf(carAngleRad));
+		frontWheel += speedMax * dt * glm::vec2(cosf(carAngleRad+wheelAngleRad) , -sinf(carAngleRad+wheelAngleRad));
+
+		glm::vec2 newPos = glm::vec2(frontWheel + backWheel) / 2.0f;
+		carAngleRad = glm::atan( frontWheel.y - backWheel.y, frontWheel.x - backWheel.x );
+
+		vecPosition.x = newPos.x;
+		vecPosition.z = newPos.y;
+
+		carAngle = util::RadToDeg(carAngleRad);
+
+//		vecAccelert *= 1.0f;
+
+//		float speedCurr = glm::length(vecVelocity);
+//		if (speedCurr < speedMax) {
+//		    vecVelocity += vecAccelert * dt;
+//		}
+
+//		vecPosition += vecVelocity * dt;
+
+//		float ang = -1.0f * util::RadToDeg(glm::atan(vecVelocity.z/vecVelocity.x));
+//		printf("ang %f\n", ang);
+
+		carOrientation = OrientationQuat(glm::vec3(0.0f, 1.0f, 0.0f), -carAngle);
+
+		printf("front (%f, %f)\trear (%f, %f)\n", frontWheel.x, frontWheel.y, backWheel.x, backWheel.y);
+		printf("car %f\twheel %f\n", carAngle, wheelAngle);
+
+//		float ang = -1.0f * util::RadToDeg(glm::atan(vecVelocity.z/vecVelocity.x));
+
+//		printf("angle: atan(%f/%f) =  %f\n", vecVelocity.x, vecVelocity.z, ang);
+//		carOrientation = OrientationQuat(glm::vec3(0.0f, 1.0f, 0.0f), ang);
 	}
 
 	void draw(shared_ptr<shader::Program> program,
@@ -57,8 +149,7 @@ public:
 
 		with matrixStack(modelToCameraStack);
 
-		// model does not 'stand' on the ground (Y=0)
-		modelToCameraStack->translate(0.0f, -0.25f, 0.0f);
+		modelToCameraStack->translate(vecPosition);
 
 		for (const auto& sub : *mesh) {
 			const string& name = sub.first;
@@ -69,12 +160,14 @@ public:
 
 			if (name.find("TireFL") != string::npos || name.find("BrakeFL") != string::npos) {
 
+				modelToCameraStack->apply(glm::mat4_cast(carOrientation));
 				modelToCameraStack->translate(-1.0f*wheelPosFL);
 				modelToCameraStack->apply(glm::mat4_cast(wheelOrientation));
 				modelToCameraStack->translate(+1.0f*wheelPosFL);
 
 			} else if (name.find("TireFR") != string::npos || name.find("BrakeFR") != string::npos) {
 
+				modelToCameraStack->apply(glm::mat4_cast(carOrientation));
 				modelToCameraStack->translate(-1.0f*wheelPosFR);
 				modelToCameraStack->apply(glm::mat4_cast(wheelOrientation));
 				modelToCameraStack->translate(+1.0f*wheelPosFR);
@@ -82,8 +175,6 @@ public:
 			} else {
 				modelToCameraStack->apply(glm::mat4_cast(carOrientation));
 			}
-
-			program->uniform("modelToCameraMatrix") = modelToCameraStack->top();
 
 			auto mat = comp.material();
 			if (mat->Kd != nullptr) program->uniform("matKd") = *(mat->Kd);
