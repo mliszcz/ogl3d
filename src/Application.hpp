@@ -250,7 +250,6 @@ public:
 
 			progMaterialAds->uniform("cameraSpaceLightPos") = cameraLightPos;
 
-//			progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
 			progMaterialAds->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 			progMaterialAds->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
@@ -261,21 +260,10 @@ public:
 				progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
 				progMaterialAds->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
 
-//				glm::mat4 invTransform = glm::inverse(modelToCameraStack->top());
-//				glm::vec4 modelLightPos = invTransform * cameraLightPos;
-//				progMaterialAds->uniform("modelSpaceLightPos") = glm::vec3(modelLightPos);
-
 				skybox->drawAll();
 			}
 
-//			glm::mat4 invTransform = glm::inverse(modelToCameraStack->top());
-//			glm::vec4 modelLightPos = invTransform * cameraLightPos;
-//			progMaterialAds->uniform("modelSpaceLightPos") = glm::vec3(modelLightPos);
-
-//			progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-//			progMaterialAds->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
-//
-			car->draw(progMaterialAds, modelToCameraStack, cameraLightPos);
+			car->draw(progMaterialAds, modelToCameraStack);
 		}
 
 
@@ -284,24 +272,19 @@ public:
 			progMaterialAds->uniform("cameraSpaceLightPos") = cameraLightPos;
 
 			modelToCameraStack->scale(1000.0f, 1.0f, 1000.0f);
-//			progTextureAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
 			progTextureAds->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 			progTextureAds->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
 			{ with texture(plane->at(0).second.material()->mapKd);
 
-//				glm::mat4 invTransform = glm::inverse(modelToCameraStack->top());
-//				glm::vec4 modelLightPos = invTransform * cameraLightPos;
-//				progMaterialAds->uniform("modelSpaceLightPos") = glm::vec3(modelLightPos);
-
-				progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-				progMaterialAds->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
+				progTextureAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+				progTextureAds->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
 
 				plane->drawAll();
 			}
 		}
 
-//		util::CheckError();
+		util::CheckError();
 
 		glutSwapBuffers();
 

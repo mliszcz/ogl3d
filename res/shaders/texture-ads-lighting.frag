@@ -42,20 +42,16 @@ void main()
 	vec4 white = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	
 	const float LOG2 = 1.442695;
-float z = gl_FragCoord.z / gl_FragCoord.w;
-float dens = 0.01f;
-vec4 fogCol = 0.5*vec4(1.0f, 1.0f, 1.0f, 2.0f);
-float fogFactor = exp2( -dens * 
-				   dens * 
-				   z * 
-				   z * 
-				   LOG2 );
-fogFactor = clamp(fogFactor, 0.0, 1.0);
+	float z = gl_FragCoord.z / gl_FragCoord.w;
+	float dens = 0.05f;
+	vec4 fogCol = vec4(0.4f, 0.4f, 0.5f, 1.0f);
+	float fogFactor = exp2(-dens*dens*z*z*LOG2);
+	fogFactor = clamp(fogFactor, 0.0, 1.0);
 	
 	vec4 outputColor =	(baseColor * ambientIntensity)
 				+	(baseColor * lightIntensity * cosAngIncidence)
-				+	(white * lightIntensity * phongTerm);
+				+	(baseColor * lightIntensity * phongTerm);
 				
-				gl_FragColor = mix(fogCol, outputColor, fogFactor);
+	gl_FragColor = mix(fogCol, outputColor, fogFactor);
 				
 }

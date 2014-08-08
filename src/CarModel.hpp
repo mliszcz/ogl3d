@@ -159,8 +159,7 @@ public:
 	}
 
 	void draw(shared_ptr<shader::Program> program,
-			shared_ptr<gfx::MatrixStack> modelToCameraStack,
-			glm::vec4 cameraLightPos) {
+			shared_ptr<gfx::MatrixStack> modelToCameraStack) {
 
 		with matrixStack(modelToCameraStack);
 
@@ -214,10 +213,6 @@ public:
 
 			program->uniform("modelToCameraMatrix") = modelToCameraStack->top();
 			program->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
-
-			//glm::mat4 invTransform = glm::inverse(modelToCameraStack->top());
-			//glm::vec4 modelLightPos = invTransform * cameraLightPos;
-			//program->uniform("modelSpaceLightPos") = glm::vec3(modelLightPos);
 
 			comp.draw();
 		}
