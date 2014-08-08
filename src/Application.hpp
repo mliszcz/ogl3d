@@ -238,8 +238,11 @@ public:
 		float frameTime = hiResColck.delta();
 		car->recalc(frameTime);
 
+		camera.target = car->position();
+
+		printf("lookat (%f, %f, %f)\n", camera.target[0], camera.target[1], camera.target[2]);
 		modelToCameraStack->set(camera.calculateLookAtMatrix());
-		modelToCameraStack->translate(camera.target);
+//		modelToCameraStack->translate(camera.target);
 //		modelToCameraStack->apply(glm::mat4_cast(g_orientation));
 
 		{ with program(progMaterialAds);

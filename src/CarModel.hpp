@@ -55,6 +55,10 @@ public:
 	CarModel(shared_ptr<gfx::Mesh> carMesh)
 		: mesh(carMesh) { }
 
+	const glm::vec3& position() {
+		return vecPosition;
+	}
+
 	void steerLeft(bool steer) {
 		steeringLeft = steer;
 		steeringRight = steeringRight && !steeringLeft;
@@ -135,8 +139,8 @@ public:
 
 		carOrientation = OrientationQuat(glm::vec3(0.0f, 1.0f, 0.0f), -carAngle);
 
-		printf("front (%f, %f)\trear (%f, %f)\n", frontWheel.x, frontWheel.y, backWheel.x, backWheel.y);
-		printf("car %f\twheel %f\n", carAngle, wheelAngle);
+//		printf("front (%f, %f)\trear (%f, %f)\n", frontWheel.x, frontWheel.y, backWheel.x, backWheel.y);
+//		printf("car %f\twheel %f\n", carAngle, wheelAngle);
 
 //		float ang = -1.0f * util::RadToDeg(glm::atan(vecVelocity.z/vecVelocity.x));
 
