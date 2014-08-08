@@ -6,10 +6,13 @@ in vec3 cameraSpacePosition;
 
 //out vec4 outputColor;
 
-uniform vec3 modelSpaceLightPos;
+//uniform vec3 modelSpaceLightPos;
+uniform vec4 cameraSpaceLightPos;
 
 uniform vec4 lightIntensity;
 uniform vec4 ambientIntensity;
+
+uniform mat4 cameraToModelMatrix;
 
 uniform vec3 modelSpaceCameraPos;
 
@@ -20,7 +23,9 @@ uniform float matNs;
 
 void main()
 {
-	vec3 lightDir = normalize(modelSpaceLightPos - modelSpacePosition);
+	vec3 lightDir = normalize(vec3(cameraToModelMatrix * cameraSpaceLightPos) - modelSpacePosition);
+	//vec3 lightDir = normalize(vec3(cameraSpaceLightPos) - cameraSpacePosition);
+	
 	vec3 surfaceNormal = normalize(vertexNormal);
 	
 	float cosAngIncidence = dot(surfaceNormal, lightDir);

@@ -7,7 +7,10 @@ in vec3 cameraSpacePosition;
 
 //out vec4 outputColor;
 
-uniform vec3 modelSpaceLightPos;
+//uniform vec3 modelSpaceLightPos;
+uniform vec4 cameraSpaceLightPos;
+
+uniform mat4 cameraToModelMatrix;
 
 uniform vec4 lightIntensity;
 uniform vec4 ambientIntensity;
@@ -18,7 +21,11 @@ uniform sampler2D textureSampler;
 
 void main()
 {
-	vec3 lightDir = normalize(modelSpaceLightPos - modelSpacePosition);
+	//vec3 lightDir = normalize(modelSpaceLightPos - modelSpacePosition);
+	vec3 lightDir = normalize(vec3(cameraToModelMatrix * cameraSpaceLightPos) - modelSpacePosition);
+	//vec3 lightDir = normalize(vec3(cameraSpaceLightPos) - cameraSpacePosition);
+	//vec3 lightDir = normalize(cameraSpaceLightPos - cameraSpacePosition);
+	
 	vec3 surfaceNormal = normalize(vertexNormal);
 	
 	float cosAngIncidence = dot(surfaceNormal, lightDir);

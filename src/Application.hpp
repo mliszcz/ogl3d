@@ -235,51 +235,73 @@ public:
 		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		glm::vec4 worldLightPos = 10.0f*glm::vec4(10.0f, 5.0f, 10.0f, 1.0f);
+
 		float frameTime = hiResColck.delta();
 		car->recalc(frameTime);
 
 		camera.target = car->position();
 
-		printf("lookat (%f, %f, %f)\n", camera.target[0], camera.target[1], camera.target[2]);
 		modelToCameraStack->set(camera.calculateLookAtMatrix());
-//		modelToCameraStack->translate(camera.target);
-//		modelToCameraStack->apply(glm::mat4_cast(g_orientation));
+
+		glm::vec4 cameraLightPos = modelToCameraStack->top() * worldLightPos;
 
 		{ with program(progMaterialAds);
 
-			progMaterialAds->uniform("modelSpaceLightPos") = 10.0f*glm::vec3(0.5f, 1.0f, 0.5f);
-			progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+			progMaterialAds->uniform("cameraSpaceLightPos") = cameraLightPos;
+
+//			progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
 			progMaterialAds->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 			progMaterialAds->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
 			{ with matrixStack(modelToCameraStack);
 
 				modelToCameraStack->scale(20.0f, 20.f, 20.f);
+
 				progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+				progMaterialAds->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
+
+//				glm::mat4 invTransform = glm::inverse(modelToCameraStack->top());
+//				glm::vec4 modelLightPos = invTransform * cameraLightPos;
+//				progMaterialAds->uniform("modelSpaceLightPos") = glm::vec3(modelLightPos);
 
 				skybox->drawAll();
 			}
 
-			progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-			car->draw(progMaterialAds, modelToCameraStack);
+//			glm::mat4 invTransform = glm::inverse(modelToCameraStack->top());
+//			glm::vec4 modelLightPos = invTransform * cameraLightPos;
+//			progMaterialAds->uniform("modelSpaceLightPos") = glm::vec3(modelLightPos);
+
+//			progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+//			progMaterialAds->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
+//
+			car->draw(progMaterialAds, modelToCameraStack, cameraLightPos);
 		}
 
 
 		{ with program(progTextureAds);
 
+			progMaterialAds->uniform("cameraSpaceLightPos") = cameraLightPos;
+
 			modelToCameraStack->scale(1000.0f, 1.0f, 1000.0f);
-			progTextureAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-			progTextureAds->uniform("modelSpaceLightPos") = 10.0f*glm::vec3(0.5f, 1.0f, 0.5f);
-			progTextureAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+//			progTextureAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
 			progTextureAds->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 			progTextureAds->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
 			{ with texture(plane->at(0).second.material()->mapKd);
+
+//				glm::mat4 invTransform = glm::inverse(modelToCameraStack->top());
+//				glm::vec4 modelLightPos = invTransform * cameraLightPos;
+//				progMaterialAds->uniform("modelSpaceLightPos") = glm::vec3(modelLightPos);
+
+				progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
+				progMaterialAds->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
+
 				plane->drawAll();
 			}
 		}
 
-		util::CheckError();
+//		util::CheckError();
 
 		glutSwapBuffers();
 
