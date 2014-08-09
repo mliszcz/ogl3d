@@ -21,13 +21,20 @@ class Camera {
 
 public:
 
-	glm::vec3 target;
 	glm::vec3 position; // spherical coordinates (phi, theta, r)
 
-	Camera(const glm::vec3& camPosition, const glm::vec3& camTarget)
-		: target(camTarget), position(camPosition) { }
+	Camera(const glm::vec3& camPosition)
+		: position(camPosition) { }
 
-	glm::vec3 cameraPosition() {
+	glm::mat4 lookAt(const glm::vec3& target) {
+
+		return _calculateLookAtMatrix(_calculatePosition()+target,
+				target, glm::vec3(0.0f, 1.0f, 0.0f));
+	}
+
+private:
+
+	glm::vec3 _calculatePosition() {
 
 		float r 	= position.z;
 		float phi 	= util::DegToRad(position.x);
@@ -47,16 +54,8 @@ public:
 		 */
 		glm::vec3 cartesianPosition = r * glm::vec3(fSinTheta*fCosPhi, fCosTheta, fSinTheta*fSinPhi);
 
-		return cartesianPosition + target;
+		return cartesianPosition;
 	}
-
-	glm::mat4 calculateLookAtMatrix() {
-
-		return _calculateLookAtMatrix(cameraPosition(),
-				target, glm::vec3(0.0f, 1.0f, 0.0f));
-	}
-
-private:
 
 	glm::mat4 _calculateLookAtMatrix(
 			const glm::vec3& cameraPos,

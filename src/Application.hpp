@@ -44,13 +44,9 @@ private:
 
 	util::HighResolutionClock hiResColck;
 
-	gfx::Camera camera = gfx::Camera(
-			glm::vec3(45.0f, -30.0f, 10.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f));
+	gfx::Camera camera = gfx::Camera(glm::vec3(45.0f, -30.0f, 10.0f));
 
 	shared_ptr<gfx::MatrixStack> modelToCameraStack = nullptr;
-
-	glm::fquat g_orientation = glm::fquat(1.0f, 0.0f, 0.0f, 0.0f);
 
 	glm::vec4 lightDirection = glm::vec4(0.866f, 0.5f, 0.0f, 0.0f);
 
@@ -61,43 +57,6 @@ private:
 	shared_ptr<gfx::Texture> texx = nullptr;
 
 private:
-
-
-	void OffsetOrientation(const glm::vec3 &_axis, float fAngDeg)
-	{
-		float fAngRad = util::DegToRad(fAngDeg);
-
-		glm::vec3 axis = glm::normalize(_axis);
-
-		axis = axis * sinf(fAngRad / 2.0f);
-		float scalar = cosf(fAngRad / 2.0f);
-
-		glm::fquat offset(scalar, axis.x, axis.y, axis.z);
-
-//		switch(g_iOffset)
-//		{
-//		case MODEL_RELATIVE:
-			g_orientation = g_orientation * offset;
-//			break;
-//		case WORLD_RELATIVE:
-//			g_orientation = offset * g_orientation;
-//			break;
-//		case CAMERA_RELATIVE:
-//			{
-//				const glm::vec3 &camPos = ResolveCamPosition();
-//				const glm::mat4 &camMat = CalcLookAtMatrix(camPos, g_camTarget, glm::vec3(0.0f, 1.0f, 0.0f));
-//
-//				glm::fquat viewQuat = glm::quat_cast(camMat);
-//				glm::fquat invViewQuat = glm::conjugate(viewQuat);
-//
-//				const glm::fquat &worldQuat = (invViewQuat * offset * viewQuat);
-//				g_orientation = worldQuat * g_orientation;
-//			}
-//			break;
-//		}
-
-		g_orientation = glm::normalize(g_orientation);
-	}
 
 	Application(int argc, char** argv)
 		: ApplicationBase(argc, argv) { }
@@ -238,11 +197,9 @@ public:
 		glm::vec4 worldLightPos = 10.0f*glm::vec4(10.0f, 5.0f, 10.0f, 1.0f);
 
 		float frameTime = hiResColck.delta();
-		car->recalc(frameTime);
+		car->update(frameTime);
 
-		camera.target = car->position();
-
-		modelToCameraStack->set(camera.calculateLookAtMatrix());
+		modelToCameraStack->set(camera.lookAt(car->position()));
 
 		glm::vec4 cameraLightPos = modelToCameraStack->top() * worldLightPos;
 
