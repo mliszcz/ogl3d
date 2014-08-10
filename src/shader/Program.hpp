@@ -29,9 +29,6 @@ public:
 
 		_handle = glCreateProgram();
 
-		auto sh = FragmentShader::fromFile("res/shaders/common/car-spotlight.glsl");
-		glAttachShader(_handle, *sh);
-
 		for(auto& shader : shaders)
 			glAttachShader(_handle, *shader);
 

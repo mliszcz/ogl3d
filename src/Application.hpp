@@ -82,14 +82,19 @@ public:
 		plane = gfx::Mesh::fromObjFile("res/models/plane/plane.obj");
 		skybox = gfx::Mesh::fromObjFile("res/models/skybox/skybox.obj");
 
+
+		auto shaderCarLights = shader::FragmentShader::fromFile("res/shaders/common/lighting.glsl");
+
 		progMaterialAds = shared_ptr<shader::Program>(new shader::Program({
 			shader::VertexShader::fromFile("res/shaders/pos-norm-passthrough.vert"),
-			shader::FragmentShader::fromFile("res/shaders/material-ads-lighting.frag")
+			shader::FragmentShader::fromFile("res/shaders/material-ads-lighting.frag"),
+			shaderCarLights
 		}));
 
 		progTextureAds = shared_ptr<shader::Program>(new shader::Program({
 			shader::VertexShader::fromFile("res/shaders/pos-norm-tex-passthrough.vert"),
-			shader::FragmentShader::fromFile("res/shaders/texture-ads-lighting.frag")
+			shader::FragmentShader::fromFile("res/shaders/texture-ads-lighting.frag"),
+			shaderCarLights
 		}));
 
 		programs.push_back(progMaterialAds);

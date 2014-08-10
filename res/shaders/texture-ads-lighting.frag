@@ -23,7 +23,9 @@ uniform vec4 gLightPosCam;
 uniform vec4 gLightDirCam;
 uniform float gConeCosine;
 
-vec4 GetSpotLightColorAt(vec3 lightPosCam, vec3 lightDirCam, float fConeCosine, vec3 vWorldPos);
+float FogFactor(vec4 glFragCoord, float density);
+float SpecularPhongTerm(vec3 lightPos, vec3 surfaceNormal, float exponent, vec3 targetPos);
+vec4 Spotlight(vec3 lightPos, vec3 lightDir, float coneCos, vec4 lightColor, vec3 targetPos);
 
 void main()
 {
@@ -35,30 +37,25 @@ void main()
 	float cosAngIncidence = dot(surfaceNormal, lightDir);
 	cosAngIncidence = clamp(cosAngIncidence, 0, 1);
 	
-	vec3 viewDirection = normalize(-cameraSpacePosition);
-	vec3 reflectDir = reflect(-lightDir, surfaceNormal);
-	float phongTerm = dot(viewDirection, reflectDir);
-	phongTerm = clamp(phongTerm, 0, 1);
-	phongTerm = cosAngIncidence != 0.0 ? phongTerm : 0.0;
-	phongTerm = pow(phongTerm, 1.0f);
+	float phongTerm = SpecularPhongTerm(vec3(cameraSpaceLightPos),
+										surfaceNormal, 100.0f, cameraSpacePosition);
 	
 	vec4 baseColor = texture(textureSampler, textureCoord);
 	vec4 white = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	
-	const float LOG2 = 1.442695;
-	float z = gl_FragCoord.z / gl_FragCoord.w;
-	float dens = 0.05f;
+	float fogFactor = FogFactor(gl_FragCoord, 0.05f);
 	vec4 fogCol = vec4(0.4f, 0.4f, 0.5f, 1.0f);
-	float fogFactor = exp2(-dens*dens*z*z*LOG2);
-	fogFactor = clamp(fogFactor, 0.0, 1.0);
 	
 	vec4 outputColor =	(baseColor * ambientIntensity)
 				+	(baseColor * lightIntensity * cosAngIncidence)
 				+	(baseColor * lightIntensity * phongTerm);
 				
-	vec4 spotlight = GetSpotLightColorAt(vec3(gLightPosCam), vec3(gLightDirCam), gConeCosine, cameraSpacePosition);
+	vec4 spotlight = Spotlight(vec3(gLightPosCam), vec3(gLightDirCam), gConeCosine, white, cameraSpacePosition);
+	
+	//fogCol = mix(spotlight, fogCol, 0.5f);
 				
 	//gl_FragColor = mix(fogCol, outputColor, fogFactor);
 	gl_FragColor = mix(spotlight, mix(fogCol, outputColor, fogFactor), 0.5f);
+	//gl_FragColor = mix(mix(spotlight, fogCol, 0.5f), outputColor, fogFactor);
 				
 }
