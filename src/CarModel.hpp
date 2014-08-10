@@ -178,7 +178,7 @@ public:
 			if (mat->Ns != nullptr) program->uniform("matNs") = *(mat->Ns);
 
 			program->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-			program->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
+			//program->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
 
 			comp.draw();
 		}

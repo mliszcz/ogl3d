@@ -12,7 +12,8 @@ uniform mat4 cameraToClipMatrix;
 
 void main()
 {
-	vertexNormal = normal;
+	//vertexNormal = normal;
+	vertexNormal = normalize(vec3(modelToCameraMatrix * vec4(normal, 0.0)));
 	
 	modelSpacePosition = position;
 	vec4 tmpCameraSpacePosition = modelToCameraMatrix * vec4(modelSpacePosition, 1.0);

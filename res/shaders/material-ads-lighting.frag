@@ -9,7 +9,7 @@ uniform vec4 cameraSpaceLightPos;
 uniform vec4 lightIntensity;
 uniform vec4 ambientIntensity;
 
-uniform mat4 cameraToModelMatrix;
+//uniform mat4 cameraToModelMatrix;
 
 uniform vec3 modelSpaceCameraPos;
 
@@ -20,7 +20,8 @@ uniform float matNs;
 
 void main()
 {
-	vec3 lightDir = normalize(vec3(cameraToModelMatrix * cameraSpaceLightPos) - modelSpacePosition);
+	//vec3 lightDir = normalize(vec3(cameraToModelMatrix * cameraSpaceLightPos) - modelSpacePosition);
+	vec3 lightDir = normalize(vec3(cameraSpaceLightPos) - modelSpacePosition);
 	
 	vec3 surfaceNormal = normalize(vertexNormal);
 	
@@ -32,7 +33,7 @@ void main()
 	float phongTerm = dot(viewDirection, reflectDir);
 	phongTerm = clamp(phongTerm, 0, 1);
 	phongTerm = cosAngIncidence != 0.0 ? phongTerm : 0.0;
-	phongTerm = pow(phongTerm, 100.0/matNs);
+	phongTerm = pow(phongTerm, matNs);
 	
 	const float LOG2 = 1.442695;
 	float z = gl_FragCoord.z / gl_FragCoord.w;
@@ -41,7 +42,7 @@ void main()
 	float fogFactor = exp2(-dens*dens*z*z*LOG2);
 	fogFactor = clamp(fogFactor, 0.0, 1.0);
 	
-	vec4 outputColor =	(matKd * ambientIntensity)
+	vec4 outputColor =	(matKa * ambientIntensity)
 				+	(matKd * lightIntensity * cosAngIncidence)
 				+	(matKs * lightIntensity * phongTerm);
 				

@@ -194,7 +194,7 @@ public:
 		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glm::vec4 worldLightPos = 10.0f*glm::vec4(10.0f, 5.0f, 10.0f, 1.0f);
+		glm::vec4 worldLightPos = glm::vec4(10.0f, 5.0f, 10.0f, 1.0f);
 
 		float frameTime = hiResColck.delta();
 		car->update(frameTime);
@@ -215,9 +215,9 @@ public:
 				modelToCameraStack->scale(20.0f, 20.f, 20.f);
 
 				progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-				progMaterialAds->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
+				//progMaterialAds->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
 
-				skybox->drawAll();
+				//skybox->drawAll();
 			}
 
 			car->draw(progMaterialAds, modelToCameraStack);
@@ -235,7 +235,7 @@ public:
 			{ with texture(plane->at(0).second.material()->mapKd);
 
 				progTextureAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-				progTextureAds->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
+				//progTextureAds->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
 
 				plane->drawAll();
 			}
