@@ -2,7 +2,7 @@
 
 // all calculations in camera space
 
-vec4 Spotlight(vec3 lightPos, vec3 lightDir, float coneCos, vec4 lightColor, vec3 targetPos)
+vec4 Spotlight(vec3 lightPos, vec3 lightDir, float coneCos, vec4 lightColor, float lightAttenuation, vec3 targetPos)
 {
 	vec3 targetDir = targetPos-lightPos;
 	float targetDist = length(targetDir);
@@ -13,7 +13,7 @@ vec4 Spotlight(vec3 lightPos, vec3 lightDir, float coneCos, vec4 lightColor, vec
 	float fFactor = clamp((targetCos-coneCos)/fDif, 0.0, 1.0);
 	
 	if(targetCos > coneCos)
-		return lightColor * fFactor/targetDist;
+		return lightColor * fFactor/(targetDist*lightAttenuation);
 		
 	return vec4(0.0, 0.0, 0.0, 0.0);
 }

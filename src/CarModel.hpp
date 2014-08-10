@@ -138,9 +138,18 @@ public:
 		modelToCameraStack->translate(carPosition);
 		modelToCameraStack->rotateY(carAngle);
 
-		program->uniform("gLightPosCam") = modelToCameraStack->top() * glm::vec4(lightPosFL, 1.0f);
-		program->uniform("gLightDirCam") = modelToCameraStack->top() * glm::vec4(1.0f, -0.2f, 0.0f, 0.0f);
-		program->uniform("gConeCosine") = cosf(util::DegToRad(20.0f));
+		program->uniform("carLightPosFL") = modelToCameraStack->top() * glm::vec4(lightPosFL, 1.0f);
+		program->uniform("carLightPosFR") = modelToCameraStack->top() * glm::vec4(lightPosFR, 1.0f);
+		program->uniform("carLightPosRL") = modelToCameraStack->top() * glm::vec4(lightPosRL, 1.0f);
+		program->uniform("carLightPosRR") = modelToCameraStack->top() * glm::vec4(lightPosRR, 1.0f);
+		program->uniform("carLightDirF") = modelToCameraStack->top() * glm::vec4(1.0f, -0.2f, 0.0f, 0.0f);
+		program->uniform("carLightDirR") = modelToCameraStack->top() * glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f);
+		program->uniform("carLightColF") = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		program->uniform("carLightColR") = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		program->uniform("carLightConeCosF") = cosf(util::DegToRad(20.0f));
+		program->uniform("carLightConeCosR") = cosf(util::DegToRad(decelerating?80.0f:0.0f));
+		program->uniform("carLightAttenF") = 0.4f;
+		program->uniform("carLightAttenR") = 2.0f;
 	}
 
 	void draw(shared_ptr<shader::Program> program,

@@ -32,7 +32,7 @@ private:
 
 	UniformVariable(TProgram* program, string name) {
 		GLint location = glGetUniformLocation(program->handle(), name.c_str());
-		if (location < 0) throw logic_error("cannot find uniform " + name);
+		//if (location < 0) throw logic_error("cannot find uniform " + name);
 		_handle = location;
 	}
 
