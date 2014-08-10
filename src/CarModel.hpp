@@ -51,6 +51,12 @@ private:
 
 	//geometry
 
+	const glm::vec3 lightPosFL = glm::vec3(+3.51603f, +1.34332f, -1.19871f);
+	const glm::vec3 lightPosFR = glm::vec3(+3.51603f, +1.34332f, +1.14737f);
+
+	const glm::vec3 lightPosRL = glm::vec3(-3.81710f, +1.65406f, -1.06305f);
+	const glm::vec3 lightPosRR = glm::vec3(-3.81710f, +1.65406f, +1.01171f);
+
 	const glm::vec3 wheelPosFL = glm::vec3(+2.53190f, +0.83931f, -1.49496f);
 	const glm::vec3 wheelPosFR = glm::vec3(+2.53182f, +0.83931f, +1.49496f);
 
@@ -122,9 +128,19 @@ public:
 
 		carPosition = (rearAxle*frontAxlePos + frontAxle*rearAxlePos)/(frontAxle+rearAxle);
 		carAngle = glm::atan(-(frontAxlePos.z-rearAxlePos.z), frontAxlePos.x-rearAxlePos.x);
+	}
 
-		printf("car speed: %f\n", carSpeed);
-		printf("car angle: %f\n", util::RadToDeg(carAngle));
+	void bindLights(shared_ptr<shader::Program> program,
+			shared_ptr<gfx::MatrixStack> modelToCameraStack) {
+
+		with matrixStack(modelToCameraStack);
+
+		modelToCameraStack->translate(carPosition);
+		modelToCameraStack->rotateY(carAngle);
+
+		program->uniform("gLightPosCam") = modelToCameraStack->top() * glm::vec4(lightPosFL, 1.0f);
+		program->uniform("gLightDirCam") = modelToCameraStack->top() * glm::vec4(1.0f, -0.2f, 0.0f, 0.0f);
+		program->uniform("gConeCosine") = cosf(util::DegToRad(20.0f));
 	}
 
 	void draw(shared_ptr<shader::Program> program,
