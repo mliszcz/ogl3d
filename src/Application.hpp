@@ -213,22 +213,17 @@ public:
 			progMaterialAds->uniform("cameraSpaceLightPos") = cameraLightPos;
 
 			progMaterialAds->uniform("lightIntensity") = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-			progMaterialAds->uniform("ambientIntensity") = 0.5f*glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+			progMaterialAds->uniform("ambientIntensity") = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
 			car->bindLights(progMaterialAds, modelToCameraStack);
 
 			{ with matrixStack(modelToCameraStack);
 
 				modelToCameraStack->scale(20.0f, 20.f, 20.f);
-
 				progMaterialAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-				//progMaterialAds->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
-
-//				car->bindLights(progMaterialAds, modelToCameraStack);
 				skybox->drawAll();
 			}
 
-//			car->bindLights(progMaterialAds, modelToCameraStack);
 			car->draw(progMaterialAds, modelToCameraStack);
 		}
 
@@ -246,8 +241,6 @@ public:
 			{ with texture(plane->at(0).second.material()->mapKd);
 
 				progTextureAds->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-				//progTextureAds->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
-
 				plane->drawAll();
 			}
 		}

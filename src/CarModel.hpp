@@ -198,12 +198,11 @@ public:
 			}
 
 			auto mat = comp.material();
-			if (mat->Kd != nullptr) program->uniform("matKd") = *(mat->Kd);
-			if (mat->Ks != nullptr) program->uniform("matKs") = *(mat->Ks);
-			if (mat->Ns != nullptr) program->uniform("matNs") = *(mat->Ns);
+			program->uniform("matKd") = (mat->Kd) ? *(mat->Kd) : glm::vec4(0.0f);
+			program->uniform("matKs") = (mat->Ks) ? *(mat->Ks) : glm::vec4(0.0f);
+			program->uniform("matNs") = (mat->Ns) ? *(mat->Ns) : 0.0f;
 
 			program->uniform("modelToCameraMatrix") = modelToCameraStack->top();
-			//program->uniform("cameraToModelMatrix") = glm::inverse(modelToCameraStack->top());
 
 			comp.draw();
 		}

@@ -18,6 +18,18 @@ vec4 Spotlight(vec3 lightPos, vec3 lightDir, float coneCos, vec4 lightColor, flo
 	return vec4(0.0, 0.0, 0.0, 0.0);
 }
 
+vec4 SpotlightRef(vec3 lightPos, vec3 lightDir, float coneCos, vec4 lightColor, float lightAttenuation, vec3 targetPos)
+{
+	vec3 refPos = lightPos+0.8*lightDir;
+	vec4 refLight = Spotlight(refPos, -lightDir, coneCos,
+							lightColor, lightAttenuation, targetPos);
+							
+	if (distance(refPos, targetPos) < 0.85)
+		return refLight;
+		
+	return vec4(0.0, 0.0, 0.0, 0.0);
+}
+
 float SpecularPhongTerm(vec3 lightPos, vec3 surfaceNormal, float exponent, vec3 targetPos)
 {
 	vec3 lightDir = normalize(lightPos-targetPos);

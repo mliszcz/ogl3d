@@ -5,12 +5,7 @@ in vec2 textureCoord;
 in vec3 modelSpacePosition;
 in vec3 cameraSpacePosition;
 
-//out vec4 outputColor;
-
-//uniform vec3 modelSpaceLightPos;
 uniform vec4 cameraSpaceLightPos;
-
-//uniform mat4 cameraToModelMatrix;
 
 uniform vec4 lightIntensity;
 uniform vec4 ambientIntensity;
@@ -18,10 +13,6 @@ uniform vec4 ambientIntensity;
 uniform vec3 modelSpaceCameraPos;
 
 uniform sampler2D textureSampler;
-
-//uniform vec4 gLightPosCam;
-//uniform vec4 gLightDirCam;
-//uniform float gConeCosine;
 
 uniform vec4 carLightPosFL;
 uniform vec4 carLightPosFR;
@@ -42,7 +33,6 @@ vec4 Spotlight(vec3 lightPos, vec3 lightDir, float coneCos, vec4 lightColor, flo
 
 void main()
 {
-	//vec3 lightDir = normalize(vec3(cameraToModelMatrix * cameraSpaceLightPos) - modelSpacePosition);
 	vec3 lightDir = normalize(vec3(cameraSpaceLightPos) - cameraSpacePosition);
 	
 	vec3 surfaceNormal = normalize(vertexNormal);
@@ -60,12 +50,10 @@ void main()
 	vec4 fogColor = vec4(0.4f, 0.4f, 0.5f, 1.0f);
 	
 	vec4 outputColor =	(baseColor * ambientIntensity)
-				+	(baseColor * lightIntensity * cosAngIncidence)
-				+	(baseColor * lightIntensity * phongTerm);
+					+	(baseColor * lightIntensity * cosAngIncidence)
+					+	(baseColor * lightIntensity * phongTerm);
 				
-	//vec4 spotlight = Spotlight(vec3(gLightPosCam), vec3(gLightDirCam), gConeCosine, white, cameraSpacePosition);
-	
-		vec4 carSpotlightFL = Spotlight(vec3(carLightPosFL), vec3(carLightDirF), carLightConeCosF,
+	vec4 carSpotlightFL = Spotlight(vec3(carLightPosFL), vec3(carLightDirF), carLightConeCosF,
 							carLightColF, carLightAttenF, cameraSpacePosition);
 							
 	vec4 carSpotlightFR = Spotlight(vec3(carLightPosFR), vec3(carLightDirF), carLightConeCosF,
@@ -83,11 +71,4 @@ void main()
 	outputColor = mix(outputColor, carSpotlightRR, carSpotlightRR.w);
 	outputColor = mix(fogColor, outputColor, fogFactor);
 	gl_FragColor = outputColor;
-	
-	//fogCol = mix(spotlight, fogCol, 0.5f);
-				
-	//gl_FragColor = mix(fogCol, outputColor, fogFactor);
-	//gl_FragColor = mix(spotlight, mix(fogCol, outputColor, fogFactor), 0.5f);
-	//gl_FragColor = mix(mix(spotlight, fogCol, 0.5f), outputColor, fogFactor);
-				
 }

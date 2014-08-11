@@ -19,7 +19,6 @@ void main()
 	cameraSpacePosition = vec3(tmpCameraSpacePosition);
 	gl_Position = cameraToClipMatrix * tmpCameraSpacePosition;
 	
-	//vertexNormal = normal;
 	vertexNormal = normalize(vec3(modelToCameraMatrix * vec4(normal, 0.0)));
 	textureCoord = texcoord;
 }
