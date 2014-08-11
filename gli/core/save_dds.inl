@@ -139,9 +139,9 @@ namespace detail
 			HeaderDesc.cubemapFlags |= detail::DDSCAPS2_VOLUME;
 
 
-		storage::size_type DepthCount = 1;
-		if(HeaderDesc.cubemapFlags & detail::DDSCAPS2_VOLUME)
-				DepthCount = HeaderDesc.depth;
+//		storage::size_type DepthCount = 1;
+//		if(HeaderDesc.cubemapFlags & detail::DDSCAPS2_VOLUME)
+//				DepthCount = HeaderDesc.depth;
 
 		File.write((char*)&HeaderDesc, sizeof(HeaderDesc));
 

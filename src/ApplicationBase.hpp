@@ -117,8 +117,8 @@ protected:
 		glutReshapeFunc([](int w, int h){ fun_reshape(w, h); });
 		glutKeyboardFunc([](unsigned char key, int x, int y){ fun_keyDown(key, x, y); });
 		glutKeyboardUpFunc([](unsigned char key, int x, int y){ fun_keyUp(key, x, y); });
-		glutSpecialFunc([](int key, int x, int y){ fun_keyDown(key, x, y); });
-		glutSpecialUpFunc([](int key, int x, int y){ fun_keyUp(key, x, y); });
+		glutSpecialFunc([](int key, int x, int y){ fun_specKeyDown(key, x, y); });
+		glutSpecialUpFunc([](int key, int x, int y){ fun_specKeyUp(key, x, y); });
 		glutMouseFunc([](int btn, int state, int x, int y){ fun_mouse(btn, state, x, y); });
 		glutMotionFunc([](int x, int y){ fun_motion(x, y); });
 		glutPassiveMotionFunc([](int x, int y){ fun_passiveMotion(x, y); });

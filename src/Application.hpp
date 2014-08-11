@@ -134,6 +134,10 @@ public:
 		case 's': car->decelerate(true); break;
 		case 'a': car->steerLeft(true); break;
 		case 'd': car->steerRight(true); break;
+		case 'W': car->accelerate(true); break;
+		case 'S': car->decelerate(true); break;
+		case 'A': car->steerLeft(true); break;
+		case 'D': car->steerRight(true); break;
 		}
 
 		glutPostRedisplay();
@@ -145,7 +149,33 @@ public:
 		case 's': car->decelerate(false); break;
 		case 'a': car->steerLeft(false); break;
 		case 'd': car->steerRight(false); break;
+		case 'W': car->accelerate(false); break;
+		case 'S': car->decelerate(false); break;
+		case 'A': car->steerLeft(false); break;
+		case 'D': car->steerRight(false); break;
 		}
+		glutPostRedisplay();
+	}
+
+	void onSpecialKeyDown(int key, int x, int y) {
+		switch (key) {
+		case GLUT_KEY_UP: 		car->accelerate(true); break;
+		case GLUT_KEY_DOWN: 	car->decelerate(true); break;
+		case GLUT_KEY_LEFT: 	car->steerLeft(true); break;
+		case GLUT_KEY_RIGHT: 	car->steerRight(true); break;
+		}
+
+		glutPostRedisplay();
+	}
+
+	void onSpecialKeyUp(int key, int x, int y) {
+		switch (key) {
+		case GLUT_KEY_UP: 		car->accelerate(false); break;
+		case GLUT_KEY_DOWN: 	car->decelerate(false); break;
+		case GLUT_KEY_LEFT: 	car->steerLeft(false); break;
+		case GLUT_KEY_RIGHT: 	car->steerRight(false); break;
+		}
+
 		glutPostRedisplay();
 	}
 
