@@ -10,7 +10,7 @@ ogl3d
    
 1. run from *ogl3d* directory  
    `ogl3d $ ./Debug/ogl3d`   
-   **NOTE** current working directory must be *ogl3d*. cause resource paths are relative to this directory
+   **NOTE** current working directory must be *ogl3d* cause resource paths are relative to this directory
 
 ### controls
 
@@ -33,7 +33,7 @@ ogl3d
 1. tiny-obj-loader (changed into header-only)  
    https://github.com/syoyo/tinyobjloader
    
-1. car model 
+1. car model  
    http://www.turbosquid.com/3d-models/mustang-gt-blend-free/645200
    
 1. asphalt texture  
