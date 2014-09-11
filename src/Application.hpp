@@ -202,7 +202,7 @@ public:
 				else if(button == GLUT_WHEEL_DOWN)
 					camera.position.z += 1.0f;
 
-				camera.position.z = glm::clamp(camera.position.z, 10.0f, 50.0f);
+				camera.position.z = glm::clamp(camera.position.z, 10.0f, 20.0f);
 		}
 
 		glutPostRedisplay();
@@ -215,7 +215,7 @@ public:
 			camera.position.y -= (y-y0)/1.0f;
 			camera.position.x += (x-x0)/1.0f;
 
-//			camera.position.y = glm::clamp(camera.position.y, -78.75f, -15.0f);
+			camera.position.y = glm::clamp(camera.position.y, -78.75f, -15.0f);
 
 			x0 = x;
 			y0 = y;
